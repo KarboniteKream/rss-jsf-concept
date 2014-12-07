@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 @SessionScoped
 public class UserBean
 {
+	private int id;
 	private String email;
 	private String password;
 	private boolean rememberMe;
@@ -73,12 +74,34 @@ public class UserBean
 	
 	public String sign_in()
 	{
-		return "home";
+		Connection conn = null;
+		PreparedStatement ps = null;
+		
+		try
+		{
+			String sql = "SELECT id FROM Users where email = ?";
+			conn = ds.getConnection();
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, email);
+			
+			ResultSet rs = ps.executeQuery();
+			rs.first();
+			
+			id = rs.getInt("id");
+			
+			return "home";
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		return "index";
 	}
 	
 	public String register()
 	{
-		return "home";
+		return "home.xhtml?faces-redirect=true";
 	}
 	
 	public String getHTML()
@@ -96,16 +119,37 @@ public class UserBean
 			
 			ResultSet rs = ps.executeQuery();
 			
-			HTML = "<ul class='connected sortable'>";
+			HTML = "<div id='subscriptions'><ul class='connected sortable'>";
+			String prevFolder = null;
+			
 			while(rs.next() == true)
 			{
 				String name = rs.getString("name");
 				String folder = rs.getString("folder");
 				int unread = rs.getInt("unread");
 				
-				HTML += String.format("<li><a>%s</a></li>", name);
+				if(folder == null)
+				{
+					HTML += String.format("<li><a class='%s'>%s</a> ", name.equals("Phoronix") ? "active" : "", name);
+					if(unread > 0)
+					{
+						HTML += String.format("<span class='badge'>%d</span>", unread);
+					}
+					HTML += "</li>";
+				}
+				else
+				{
+//					if(prevFolder == null)
+//					{
+//						HTML += "<ul>";
+//					}
+//					if(folder.equals(prevFolder) == false)
+//					{
+//						prevFolder = folder;
+//					}
+				}
 			}
-			HTML += "</ul>";
+			HTML += "</ul></div>";
 		}
 		catch(Exception e)
 		{

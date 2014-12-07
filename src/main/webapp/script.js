@@ -7,12 +7,12 @@ $(document).ready(function()
 	$(".popup").hide();
 	$("#email-registered").hide();
 
+	// OK
 	$("article a").attr("target", "_blank");
 	setSortable();
+	// OK
 
 	loadSidebar();
-	//loadFeed();
-	loadFeatured();
 
 	$("input").on("input", function()
 	{
@@ -102,11 +102,13 @@ $(document).ready(function()
 
 	$(".action-bar span:contains('ike')").click(function()
 	{
+		alert("OK");
 		like($(this));
 	});
 
 	$(".action-bar span:contains('read')").click(function()
 	{
+		alert("OK");
 		markAsRead($(this));
 	});
 
