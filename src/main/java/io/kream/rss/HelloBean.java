@@ -6,18 +6,12 @@ import javax.faces.bean.SessionScoped;
 @ManagedBean(name = "helloBean")
 @SessionScoped
 public class HelloBean {
-	private String name;
+	private String email;
 	private String password;
 	
-	public HelloBean()
+	public String getEmail()
 	{
-		name = "Klemen";
-		password = "gasilec";
-	}
-	
-	public String getName()
-	{
-		return name;
+		return email;
 	}
 	
 	public String getPassword()
@@ -25,12 +19,12 @@ public class HelloBean {
 		return password;
 	}
 	
-	public void setName(String name)
+	public void setEmail(final String email)
 	{
-		this.name = name;
+		this.email = email;
 	}
 	
-	public void setPassword(String password)
+	public void setPassword(final String password)
 	{
 		this.password = password;
 	}

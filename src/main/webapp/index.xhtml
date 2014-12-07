@@ -5,6 +5,15 @@
 		<title>kream</title>
 	</h:head>
 	<h:body>
-		<p>#{helloBean.name}</p>
+		<h:form>
+			<h:panelGrid>
+				<h:outputText value="email"></h:outputText>
+				<h:inputText value="#{helloBean.email}"></h:inputText>
+				<h:outputText value="password"></h:outputText>
+				<h:inputSecret value="#{helloBean.password}"></h:inputSecret>
+			</h:panelGrid>
+			<h:commandButton value="Sign in" action="home"></h:commandButton>
+		</h:form>
+		<p>#{helloBean.email}</p>
 	</h:body>
 </html>
