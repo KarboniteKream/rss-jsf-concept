@@ -1,19 +1,79 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html" xmlns:a="http://xmlns.jcp.org/jsf/passthrough" >
 	<h:head>
 		<title>kream</title>
+		<meta charset="UTF-8" />
+		<link href="resources/kream.png" rel="icon" type="image/png" />
+		<link href="style.css" rel="stylesheet" type="text/css" />
+		<script src="//code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+		<script src="html.sortable.min.js" type="text/javascript"></script>
+		<script src="script.js" type="text/javascript"></script>
 	</h:head>
-	<h:body>
-		<h:form>
-			<h:panelGrid>
-				<h:outputText value="email"></h:outputText>
-				<h:inputText value="#{helloBean.email}"></h:inputText>
-				<h:outputText value="password"></h:outputText>
-				<h:inputSecret value="#{helloBean.password}"></h:inputSecret>
-			</h:panelGrid>
-			<h:commandButton value="Sign in" action="home"></h:commandButton>
-		</h:form>
-		<p>#{helloBean.email}</p>
+	<h:body id="index">
+		<header>
+			<h1><a href="/">kream.io</a><span class="version"> rss</span></h1>
+			<nav>
+				<ul>
+					<li><span class="button-secondary open-popup" target-popup="#register">Register</span></li>
+					<li><span class="button-primary open-popup" target-popup="#sign-in">Sign in</span></li>
+				</ul>
+			</nav>
+		</header>
+		<main>
+			<div id="banner">the next-generation <span class="rss">RSS</span> reader</div>
+			<div id="landing">
+				<div>
+					<div class="header">
+						<span id="fullscreen" class="button-primary">v</span>
+						<h2>Featured articles</h2>
+					</div>
+					<div id="featured">				
+					</div>
+				</div>
+			</div>
+		</main>
+		<div id="overlay" onclick="hideOverlay()"></div>
+		<div id="sign-in" class="popup">
+			<div class="header">
+				<span class="button-secondary" onclick="hideOverlay()">×</span>
+				<h3>Sign in</h3>
+			</div>
+			<h:form>
+				<fieldset>
+					<h:inputText name="email" value="#{userBean.email}" required="true" tabindex="1" a:placeholder="e-mail">
+						<f:validateRegex pattern="^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$" />
+					</h:inputText>
+					<br />
+					<h:inputSecret name="password" value="#{userBean.password}" required="true" tabindex="2" a:placeholder="password" />
+					<br />
+					<h:commandButton value="Sign in" action="#{userBean.sign_in}" tabindex="4">
+					</h:commandButton>
+					<h:selectBooleanCheckbox id="remember-me" value="#{userBean.rememberMe}" tabindex="3" />
+					<h:outputLabel value="Remember me" for="remember-me" />
+				</fieldset>
+			</h:form>
+		</div>
+		<div id="register" class="popup">
+			<div class="header">
+				<span class="button-secondary" onclick="hideOverlay()">×</span>
+				<h3>Register</h3>
+			</div>
+			<h:form method="post">
+				<fieldset>
+					<h:inputText name="real-name" a:placeholder="real name" />
+					<br />
+					<h:inputText id="new-email" value="#{userBean.email}" name="email" a:placeholder="e-mail" />
+					<br />
+					<span id="email-registered">This email is already registered.</span>
+					<br />
+					<h:inputSecret name="password" value="#{userBean.password}" a:placeholder="password" />
+					<br />
+					<h:inputSecret styleClass="confirm-password" a:placeholder="confirm password" />
+					<br />
+					<h:commandButton value="Register" action="#{userBean.register}" />
+				</fieldset>
+			</h:form>
+		</div>
 	</h:body>
 </html>
