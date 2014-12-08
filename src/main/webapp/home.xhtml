@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets">
 	<h:head>
 		<title>kream</title>
 		<meta charset="UTF-8" />
@@ -45,7 +45,18 @@
 					<h2 id="feed-name"></h2>
 				</div>
 				<div id="reader">
-					<h:outputText value="#{contentBean.articles}" escape="false" />
+					<ui:repeat var="article" value="#{contentBean.art}">
+						<article id="#{article.id}" class="unread">
+							<div class="date">#{article.date}</div>
+							<h2><a href="#{article.url}">#{article.title}</a></h2>
+							<ui:fragment rendered="#{not empty article.author}"><div class="author">by <b>#{article.author}</b></div></ui:fragment>
+							<div class="content"><p><h:outputText value="#{article.content}" escape="false" /></p></div>
+							<div class="action-bar">
+								<span>Like</span>
+								<span>Mark as read</span>
+							</div>
+						</article>
+					</ui:repeat>
 				</div>
 			</div>
 		</div>

@@ -1,9 +1,11 @@
 <div class="home-left">
-						<h2 class="notice">You have 7 unread articles.</h2>
-						<div id="widgets">
-							<img src="http://imgs.xkcd.com/comics/time.png" title="The end." alt="The current time is unknown." />
-						</div>
-					</div>
-					<div id="featured" class="home-right">
-						<h:outputText value="#{featuredBean.HTML}" escape="false" />
-					</div>
+	<h2 class="notice">You have 7 unread articles.</h2>
+	<div id="widgets">
+		<img src="http://imgs.xkcd.com/comics/time.png" title="The end." alt="The current time is unknown." />
+	</div>
+</div>
+<div id="featured" class="home-right">
+	<h:outputText value="#{featuredBean.HTML}" escape="false" />
+</div>
+					
+<h:outputText value="#{contentBean.articles}" escape="false" />

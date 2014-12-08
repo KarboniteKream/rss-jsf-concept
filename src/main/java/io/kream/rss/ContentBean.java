@@ -6,8 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Base64.Encoder;
+import java.util.List;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
@@ -25,7 +26,7 @@ public class ContentBean
 	private int feedId;
 	
 	private String sidebar;
-	private String articles;
+	private List<Article> articles;
 	
 //	@Resource(name = "jdbc/database")
 	DataSource ds;
@@ -44,7 +45,9 @@ public class ContentBean
 		
 		userId = 1;
 		location = "feed";
-		feedId = 26;
+		feedId = 1;
+		
+		setArticles(new ArrayList<Article>());
 	}
 	
 	public int getUserId()
@@ -194,12 +197,12 @@ public class ContentBean
 		return sidebar;
 	}
 	
-	public String getArticles()
+	public List<Article> getArticles()
 	{
 		Connection conn = null;
 		PreparedStatement ps = null;
 		
-		articles = "";
+		articles.clear();
 		
 		try
 		{
@@ -220,22 +223,12 @@ public class ContentBean
 				{
 					empty = false;
 					
-					articles += String.format("<article id='%d' class='unread'><div class='date'>%s</div><h2><a href='%s'>%s</a></h2>",
-							rs.getInt("id"), df.format(rs.getDate("date")), rs.getString("url"), rs.getString("title"));
-					
-					String author = rs.getString("author");
-					if(author != null)
-					{
-						articles += String.format("<div class='author'>by <b>%s</b></div>", author);
-					}
-					
-					articles += String.format("<div class='content'><p>%s</p></div><div class='action-bar'><span>Like</span><span>Mark as read</span></div></article>",
-							rs.getString("content"));
+					articles.add(new Article(rs.getInt("id"), rs.getString("title"), rs.getString("url"), rs.getString("author"), df.format(rs.getDate("date")), rs.getString("content")));
 				}
 				
 				if(empty == true)
 				{
-					articles = "<span style='display: block; padding-top: 15px; text-align: center; font-size: 18px;'>There are no unread articles.</span>";
+					//articles = "<span style='display: block; padding-top: 15px; text-align: center; font-size: 18px;'>There are no unread articles.</span>";
 				}
 			}
 			
@@ -248,5 +241,9 @@ public class ContentBean
 		}
 		
 		return articles;
+	}
+
+	public void setArticles(List<Article> articles) {
+		this.articles = articles;
 	}
 }

@@ -1,6 +1,5 @@
 package io.kream.rss;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,7 +7,6 @@ import java.sql.ResultSet;
 import javax.annotation.Resource;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
-import javax.faces.context.FacesContext;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -26,7 +24,6 @@ public class UserBean
 	private String errorMessage;
 	
 	private String location;
-	private String HTML;
 	
 //	@Resource(name = "jdbc/database")
 	DataSource ds;
@@ -44,7 +41,6 @@ public class UserBean
 		}
 		
 		location = "arch";
-		HTML = "";
 	}
 	
 	public String validate()
@@ -102,61 +98,6 @@ public class UserBean
 	public String register()
 	{
 		return "home.xhtml?faces-redirect=true";
-	}
-	
-	public String getHTML()
-	{
-		Connection conn = null;
-		PreparedStatement ps = null;
-		
-		try
-		{
-			String sql = "SELECT s.folder, f.id, f.name, f.icon, u.unread FROM Subscriptions s JOIN Feeds f ON s.feed_id = f.id LEFT JOIN (SELECT a.feed_id, COUNT(a.feed_id) AS unread FROM Unread JOIN Articles a ON article_id = a.id WHERE user_id = ? GROUP BY feed_id) AS u ON f.id = u.feed_id WHERE s.user_id = ? ORDER BY s.folder, f.name";
-			conn = ds.getConnection();
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, 1);
-			ps.setInt(2, 1);
-			
-			ResultSet rs = ps.executeQuery();
-			
-			HTML = "<div id='subscriptions'><ul class='connected sortable'>";
-			String prevFolder = null;
-			
-			while(rs.next() == true)
-			{
-				String name = rs.getString("name");
-				String folder = rs.getString("folder");
-				int unread = rs.getInt("unread");
-				
-				if(folder == null)
-				{
-					HTML += String.format("<li><a class='%s'>%s</a> ", name.equals("Phoronix") ? "active" : "", name);
-					if(unread > 0)
-					{
-						HTML += String.format("<span class='badge'>%d</span>", unread);
-					}
-					HTML += "</li>";
-				}
-				else
-				{
-//					if(prevFolder == null)
-//					{
-//						HTML += "<ul>";
-//					}
-//					if(folder.equals(prevFolder) == false)
-//					{
-//						prevFolder = folder;
-//					}
-				}
-			}
-			HTML += "</ul></div>";
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-
-		return HTML;
 	}
 	
 	public void setEmail(final String email)
