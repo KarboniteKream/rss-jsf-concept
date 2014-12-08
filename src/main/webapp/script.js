@@ -5,7 +5,7 @@ $(document).ready(function()
 	$("#overlay").hide();
 	$("#add-subscription").hide();
 	$(".popup").hide();
-	$("#email-registered").hide();
+	//$("#email-registered").hide();
 
 	// OK
 	$("article a").attr("target", "_blank");

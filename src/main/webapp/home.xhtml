@@ -45,7 +45,7 @@
 					<h2 id="feed-name"></h2>
 				</div>
 				<div id="reader">
-					<ui:repeat var="article" value="#{contentBean.art}">
+					<ui:repeat var="article" value="#{contentBean.articles}">
 						<article id="#{article.id}" class="unread">
 							<div class="date">#{article.date}</div>
 							<h2><a href="#{article.url}">#{article.title}</a></h2>

@@ -64,9 +64,11 @@
 				<fieldset>
 					<h:inputText name="real-name" a:placeholder="real name" />
 					<br />
-					<h:inputText id="new-email" value="#{userBean.email}" name="email" a:placeholder="e-mail" />
+					<h:inputText id="new-email" value="#{userBean.email}" name="email" a:placeholder="e-mail">
+						<f:ajax event="blur" execute="new-email" render="email-exists" />
+					</h:inputText>
 					<br />
-					<span id="email-registered">This email is already registered.</span>
+					<span id="email-registered"><h:outputText id="email-exists" value="#{userBean.errorMessage}" /></span>
 					<br />
 					<h:inputSecret name="password" value="#{userBean.password}" a:placeholder="password" />
 					<br />

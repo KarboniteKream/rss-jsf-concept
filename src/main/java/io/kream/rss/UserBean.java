@@ -41,6 +41,12 @@ public class UserBean
 		}
 		
 		location = "arch";
+		errorMessage = "";
+	}
+	
+	public String checkEmail()
+	{
+		return "This email is already registered.";
 	}
 	
 	public String validate()
@@ -103,6 +109,7 @@ public class UserBean
 	public void setEmail(final String email)
 	{
 		this.email = email;
+		this.errorMessage = "This email is already registered.";
 	}
 	
 	public String getEmail()
