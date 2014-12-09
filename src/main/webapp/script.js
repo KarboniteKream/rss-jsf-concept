@@ -12,8 +12,6 @@ $(document).ready(function()
 	setSortable();
 	// OK
 
-	loadSidebar();
-
 	$("input").on("input", function()
 	{
 		if($(this).val() != "")
@@ -50,7 +48,7 @@ $(document).ready(function()
 
 	$(".action-bar").append('<span class="remove-article">Remove</span>');
 
-	// remove remove from index
+	// remove 'remove' from index.html
 	$(".action-bar").on("click", ".remove-article", function()
 	{
 		$(this).parent().parent().slideUp(function()
@@ -136,10 +134,7 @@ $(document).ready(function()
 		}
 	});
 
-	$("span:contains('Refresh')").click(function()
-	{
-		loadFeed();
-	});
+	$("span:contains('Refresh')").click(function(){});
 
 	$(".confirm-password, .confirm-email").blur(function()
 	{
@@ -220,89 +215,6 @@ function unsubscribe()
 	});
 }
 
-function loadSidebar()
-{
-	$.ajax
-	({
-		url: "util.php?function=count-unread",
-		type: "GET",
-		success: function(data)
-		{
-			$("#sidebar-content").empty();
-			$("#sidebar-content").append
-			(
-				$("<div>").attr("id", "menu").append
-				(
-					$("<ul>").append
-					(
-						$("<li>").append
-						(
-							$("<a>").attr({ "id": "home", "feed": "home", "href": "javascript:;" }).text("Home")
-						),
-						$("<li>").append
-						(
-							$("<a>").attr({ "id": "unread", "feed": "unread", "href": "javascript:;" }).text("Unread"),
-							$("<span>").addClass("badge").text(data != "0" ? " " + data : "")
-						),
-						$("<li>").append
-						(
-							$("<a>").attr({ "id": "liked", "feed": "liked", "href": "javascript:;" }).text("Liked")
-						),
-						$("<li>").append
-						(
-							$("<a>").attr({ "id": "all", "feed": "all", "href": "javascript:;" }).text("All articles")
-						)
-					)
-				),
-				$("<div>").attr("id", "subscriptions")
-			);
-
-			$.ajax
-			({
-				url: "util.php?function=load-sidebar",
-				type: "GET",
-				success: function(data)
-				{
-					$("#subscriptions").html(data);
-					setSortable();
-
-					$(".sortable").sortable().bind("sortupdate", function(e, ui)
-					{
-						var ui = ui;
-						$.ajax
-						({
-							url: "/util.php?function=set-folder",
-							type: "POST",
-							data: { "feed_id": ui.item.children().first().attr("feed"), "folder": ui.endparent.prev().text() },
-							success: function()
-							{
-								loadSidebar();
-							}
-						});
-					});
-
-					$("#subscriptions li a, #menu li a").click(function()
-					{
-						var link = $(this);
-
-						$.ajax
-						({
-							url: "/util.php?function=open-feed",
-							type: "GET",
-							data: { "feed":  link.attr("feed") },
-							success: function(data)
-							{
-								loadSidebar();
-								loadFeed();
-							}
-						});
-					});
-				}
-			});
-		}
-	});
-}
-
 function changeEmail()
 {
 	$.ajax
@@ -313,81 +225,6 @@ function changeEmail()
 	});
 }
 
-function loadFeed()
-{
-	$.ajax
-	({
-		url: "util.php?function=feed-name",
-		type: "GET",
-		success: function(data)
-		{
-			var feedName = data;
-
-			$.ajax
-			({
-				url: "/util.php?function=load-feed",
-				type: "GET",
-				success: function(data)
-				{
-					$(".open-popup").click(function()
-					{
-						$("#overlay").fadeIn("fast");
-						$($(this).attr("target-popup")).fadeIn("fast");
-					});
-
-					$("#reader").empty();
-					$("#feed-name").text(feedName);
-
-					if(data != "[]")
-					{
-						$.parseJSON(data).forEach(function(article)
-						{
-							$("#reader").append
-							(
-								$("<article>").attr("id", article.id).addClass(article.status[0]).addClass(article.status[1]).append
-								(
-									$("<div>").addClass("date").text(article.date),
-									$("<h2>").append
-									(
-										$("<a>").attr("href", article.url).text(article.title)
-									),
-									$("<div>").addClass("content").html("<p>" + article.content + "</p>"),
-									$("<div>").addClass("action-bar").append
-									(
-										$("<span>").text(article.status[0] == "liked" ? "Unlike" : "Like").click(function()
-										{
-											like($(this));
-										}),
-										$("<span>").text(article.status[1] == "unread" ? "Mark as read" : "Mark as unread").click(function()
-										{
-											markAsRead($(this));
-										})
-									)
-								)
-							);
-
-							$("#reader article:last-child h2").after(function()
-							{
-								if(article.author != null)
-								{
-									return $("<div>").addClass("author").html("by <b>" + article.author + "</b>");
-								}
-							});
-						});
-					}
-					else
-					{
-						$("#reader").append
-						(
-							$("<span>").css({ "display": "block", "padding-top": "15px", "text-align": "center", "font-size": "18px" }).text("There are no unread articles.")
-						);
-					}
-				}
-			});
-		}
-	});
-
-}
 
 function validateEmail(email)
 {

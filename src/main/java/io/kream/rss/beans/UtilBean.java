@@ -60,16 +60,21 @@ public class UtilBean
 				break;
 
 				case -2:
+					contentBean.setLocation("unread");
+					contentBean.setFeedName("Unread articles");
 				break;
 
 				case -3:
+					contentBean.setLocation("home");
+					contentBean.setFeedName("Liked articles");
 				break;
 
 				case -4:
+					contentBean.setLocation("all");
+					contentBean.setFeedName("All articles");
 				break;
 				
 				default:
-					// keep id in this bean?
 					ps = conn.prepareStatement("SELECT name FROM Feeds WHERE id = ?");
 					ps.setInt(1, contentBean.getFeedId());
 					
@@ -78,7 +83,6 @@ public class UtilBean
 					if(rs.first() == true)
 					{
 						contentBean.setLocation("feed");
-						// contentBean.setFeedId(Integer.parseInt(id));
 						contentBean.setFeedName(rs.getString("name"));
 					}
 					

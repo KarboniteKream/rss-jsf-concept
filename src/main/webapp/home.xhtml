@@ -52,11 +52,43 @@
 							</ul>
 						</div>
 						<div id="subscriptions">
-							<ul class="connected sortable">
-								<ui:repeat var="feed" value="#{contentBean.feeds}">
-									<li><h:commandLink value="#{feed.name}" style="#{feed.icon}" action="#{utilBean.changeFeed}">
-										<f:setPropertyActionListener value="#{feed.id}" target="#{contentBean.feedId}" />
-									</h:commandLink></li>
+							<ui:repeat var="folder" value="#{contentBean.folders}" size="1">
+								<ui:fragment rendered="#{folder eq null}">
+									<ul class="connected sortable">
+										<ui:repeat var="feed" value="#{contentBean.feeds}">
+											<li>
+												<h:commandLink value="#{feed.name}" style="#{feed.icon}" action="#{utilBean.changeFeed}">
+													<f:setPropertyActionListener value="#{feed.id}" target="#{contentBean.feedId}" />
+												</h:commandLink>
+												<ui:fragment rendered="#{feed.unread ne 0}">
+													<span class="badge"><h:outputText value="#{feed.unread}" /></span>
+												</ui:fragment>
+											</li>
+										</ui:repeat>
+									</ul>
+								</ui:fragment>
+							</ui:repeat>
+							<ul>
+								<ui:repeat var="folder" value="#{contentBean.folders}">
+									<ui:fragment rendered="#{folder ne null}">
+										<li class="folder">
+											<input type="checkbox" id="#{folder}-folder" />
+											<label for="#{folder}-folder"><h:outputText value="#{folder}" /></label>
+											<ul class="connected sortable">
+												<ui:repeat var="feed" value="#{contentBean.folderFeeds}">
+													<li>
+														<h:commandLink value="#{feed.name}" style="#{feed.icon}" action="#{utilBean.changeFeed}">
+															<f:setPropertyActionListener value="#{feed.id}" target="#{contentBean.feedId}" />
+														</h:commandLink>
+														<ui:fragment rendered="#{feed.unread ne 0}">
+															<span class="badge"><h:outputText value="#{feed.unread}" /></span>
+														</ui:fragment>
+													</li>
+												</ui:repeat>
+												<li class='empty-li' />
+											</ul>
+										</li>
+									</ui:fragment>
 								</ui:repeat>
 							</ul>
 						</div>

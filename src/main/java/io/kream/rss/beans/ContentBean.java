@@ -3,14 +3,12 @@ package io.kream.rss.beans;
 import io.kream.rss.entities.Article;
 import io.kream.rss.entities.Feed;
 
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 import javax.faces.bean.ManagedBean;
@@ -38,7 +36,10 @@ public class ContentBean
 	
 	private String message;
 
-	private List<Feed> feeds;
+	private List<String> folders;
+	private ArrayList<ArrayList<Feed>> feeds;
+	private int idx;
+	
 	private List<Article> articles;
 	private List<Article> featured;
 	
@@ -54,12 +55,14 @@ public class ContentBean
 			e.printStackTrace();
 		}
 
-		location = "feed";
+		location = "home";
+		feedId = -1;
+		setFeedName("Home");
+
+		setFolders(new ArrayList<String>());
+		feeds = new ArrayList<ArrayList<Feed>>();
+		idx = 0;
 		
-		feedId = 26;
-		setFeedName("Phoronix?");
-		
-		setFeeds(new ArrayList<Feed>());
 		setArticles(new ArrayList<Article>());
 		setFeatured(new ArrayList<Article>());
 	}
@@ -97,21 +100,17 @@ public class ContentBean
 		try
 		{
 			conn = ds.getConnection();
+			
 			feeds.clear();
+			idx = 0;
 			
 //			ps = conn.prepareStatement("SELECT COUNT(article_id) AS unread FROM Unread WHERE user_id = ?");
 //			ps.setInt(1, userBean.getUser().getId());
-//			ResultSet rs = ps.executeQuery();
-//			rs.first();
-//			int unread = rs.getInt("unread");
-//			
-//			sidebar += "<div id='menu'><ul>";
 //			sidebar += "<li><a id='unread' feed='unread' href='javascript:;'>Unread</a> ";
 //			if(unread > 0)
 //			{
 //				sidebar += String.format("<span class='badge'>%d</span></li>", unread);
 //			}
-//			sidebar += "</ul></div>";
 //			
 //			ps.close();
 			
@@ -120,71 +119,67 @@ public class ContentBean
 			ps.setInt(2, userBean.getUser().getId());
 			
 			ResultSet rs = ps.executeQuery();
+
+			ArrayList<Feed> l = new ArrayList<Feed>();
+			String prevFolder = null;
 			
 			while(rs.next() == true)
 			{
-				feeds.add(new Feed(rs.getInt("id"), rs.getString("name"), rs.getBlob("icon"), rs.getInt("unread"), rs.getString("folder")));
-//				String folder = rs.getString("folder");
-//				unread = rs.getInt("unread");
-//				
-//				if(folder != null)
-//				{
-//					rs.previous();
-//					break;
-//				}
-//				
-//				sidebar += String.format("<li><a feed='%d' href='javascript:;' class='%s'",
-//						id, feedId == id ? "active" : "");
-//				
-//				if(iconStr.equals("") == false)
-//				{
-//					sidebar += String.format("style='background-image: url(data:image/png;base64,%s);'", iconStr);
-//				}
-//				
-//				sidebar += String.format(">%s</a> ", rs.getString("name"));
-//				
-//				if(unread > 0)
-//				{
-//					sidebar += String.format("<span class='badge'>%d</span>", unread);
-//				}
-//				
-//				sidebar += "</li>";
+				String folder = rs.getString("folder");
+				
+				if(prevFolder != null && folder.equals(prevFolder) == false)
+				{
+					prevFolder = folder;
+					feeds.add(l);
+					l = new ArrayList<Feed>();
+				}
+				else if(prevFolder == null && folder != prevFolder)
+				{
+					prevFolder = folder;
+					feeds.add(l);
+					l = new ArrayList<Feed>();
+				}
+				
+				l.add(new Feed(rs.getInt("id"), rs.getString("name"), rs.getBlob("icon"), rs.getInt("unread"), folder));
 			}
-//			
-//			sidebar += "</ul><ul>";
-//
-//			String prevFolder = null;
-//			
-//			while(rs.next() == true)
-//			{
-//				int id = rs.getInt("id");
-//				String folder = rs.getString("folder");
-//				unread = rs.getInt("unread");
-//				
-//				if(folder.equals(prevFolder) == false)
-//				{
-//					if(prevFolder != null)
-//					{
-//						sidebar += "<li class='empty-li' /></ul></li>";
-//					}
-//					
-//					prevFolder = folder;
-//					sidebar += String.format("<li class='folder'><input type='checkbox' id='folder-toggle' /><label for='folder-toggle'>%s</label><ul class='connected sortable'>", folder);
-//				}
-//				
-//				//icon badge
-//				sidebar += String.format("<li><a feed='%d' href='javascript:;' class='%s'>%s</a> ", id, feedId == id ? "active" : "", rs.getString("name"));
-//
-//				if(unread > 0)
-//				{
-//					sidebar += String.format("<span class='badge'>%d</span>", unread);
-//				}
-//				
-//				sidebar += "</li>";
-//			}
-//
-//			sidebar += "<li class='empty-li' /></ul></li>";
-//			sidebar += "</ul></div>";
+			
+			feeds.add(l);
+
+			ps.close();
+			conn.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		return feeds.get(0);
+	}
+	
+	public void setFeeds(ArrayList<ArrayList<Feed>> feeds)
+	{
+		this.feeds = feeds;
+	}
+	
+	public List<String> getFolders()
+	{
+		Connection conn = null;
+		PreparedStatement ps = null;
+		
+		try
+		{
+			conn = ds.getConnection();
+			folders.clear();
+			
+			ps = conn.prepareStatement("SELECT DISTINCT folder FROM Subscriptions WHERE user_id = ? ORDER BY folder");
+			ps.setInt(1, userBean.getUser().getId());
+			
+			ResultSet rs = ps.executeQuery();
+			
+			while(rs.next() == true)
+			{
+				folders.add(rs.getString("folder"));
+			}
 			
 			ps.close();
 			conn.close();
@@ -194,14 +189,24 @@ public class ContentBean
 			e.printStackTrace();
 		}
 
-		return feeds;
+		return folders;
 	}
-	
-	public void setFeeds(List<Feed> feeds)
+
+	public void setFolders(List<String> folders)
 	{
-		this.feeds = feeds;
+		this.folders = folders;
 	}
 	
+	public List<Feed> getFolderFeeds()
+	{
+		int i = (idx == feeds.size() - 1) ? idx : idx + 1;
+		
+		List<Feed> folderFeeds = feeds.get(i);
+		idx++;
+		
+		return folderFeeds;
+	}
+
 	public List<Article> getArticles()
 	{
 		Connection conn = null;
