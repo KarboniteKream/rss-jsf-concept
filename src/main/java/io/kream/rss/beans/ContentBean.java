@@ -20,7 +20,6 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 @ManagedBean(name = "contentBean")
-// request scoped?
 @SessionScoped
 public class ContentBean
 {
@@ -30,10 +29,9 @@ public class ContentBean
 	private UserBean userBean;
 	
 	private String location;
-	
 	private int feedId;
 	private String feedName;
-	
+
 	private String message;
 
 	private List<String> folders;
@@ -59,12 +57,19 @@ public class ContentBean
 		feedId = -1;
 		setFeedName("Home");
 
+		message = "";
+
 		setFolders(new ArrayList<String>());
 		feeds = new ArrayList<ArrayList<Feed>>();
 		idx = 0;
 		
 		setArticles(new ArrayList<Article>());
 		setFeatured(new ArrayList<Article>());
+	}
+
+	public UserBean getUserBean()
+	{
+		return userBean;
 	}
 	
 	public void setUserBean(UserBean userBean)
@@ -105,14 +110,11 @@ public class ContentBean
 			idx = 0;
 			
 //			ps = conn.prepareStatement("SELECT COUNT(article_id) AS unread FROM Unread WHERE user_id = ?");
-//			ps.setInt(1, userBean.getUser().getId());
 //			sidebar += "<li><a id='unread' feed='unread' href='javascript:;'>Unread</a> ";
 //			if(unread > 0)
 //			{
 //				sidebar += String.format("<span class='badge'>%d</span></li>", unread);
 //			}
-//			
-//			ps.close();
 			
 			ps = conn.prepareStatement("SELECT s.folder, f.id, f.name, f.icon, u.unread FROM Subscriptions s JOIN Feeds f ON s.feed_id = f.id LEFT JOIN (SELECT a.feed_id, COUNT(a.feed_id) AS unread FROM Unread JOIN Articles a ON article_id = a.id WHERE user_id = ? GROUP BY feed_id) AS u ON f.id = u.feed_id WHERE s.user_id = ? ORDER BY s.folder, f.name");
 			ps.setInt(1, userBean.getUser().getId());
@@ -216,13 +218,31 @@ public class ContentBean
 		{
 			conn = ds.getConnection();
 			articles.clear();
-			ps = conn.prepareStatement("SELECT a.id, a.title, a.url, a.author, a.date, a.content FROM Users u JOIN Unread ur ON u.id = ur.user_id JOIN Articles a ON ur.article_id = a.id JOIN Feeds f ON a.feed_id = f.id WHERE u.id = ? AND f.id = ? ORDER BY a.date DESC");
 			
-			if(location.equals("feed") && userBean.getUser().getId() != -1)
+			if(location.equals("unread") == true)
 			{
+				ps = conn.prepareStatement("SELECT a.id, a.title, a.url, a.author, a.date, a.content FROM Unread l JOIN Articles a ON l.article_id = a.id WHERE user_id = ? ORDER BY a.date DESC");
+				ps.setInt(1, userBean.getUser().getId());
+			}
+			else if(location.equals("liked") == true)
+			{
+				ps = conn.prepareStatement("SELECT a.id, a.title, a.url, a.author, a.date, a.content FROM Liked l JOIN Articles a ON l.article_id = a.id WHERE user_id = ?");
+				ps.setInt(1, userBean.getUser().getId());
+			}
+			else if(location.equals("all") == true)
+			{
+				ps = conn.prepareStatement("SELECT l.user_id AS liked, u.user_id AS unread, a.id, a.title, a.url, a.author, a.date, a.content FROM Subscriptions s JOIN Feeds f ON s.feed_id = f.id JOIN Articles a ON f.id = a.feed_id LEFT JOIN Liked l ON a.id = l.article_id LEFT JOIN Unread u ON a.id = u.article_id WHERE s.user_id = ? ORDER BY a.date DESC LIMIT 25");
+				ps.setInt(1, userBean.getUser().getId());
+			}
+			else if(location.equals("feed") == true && userBean.getUser().getId() != -1)
+			{
+				ps = conn.prepareStatement("SELECT a.id, a.title, a.url, a.author, a.date, a.content FROM Users u JOIN Unread ur ON u.id = ur.user_id JOIN Articles a ON ur.article_id = a.id JOIN Feeds f ON a.feed_id = f.id WHERE u.id = ? AND f.id = ? ORDER BY a.date DESC");
 				ps.setInt(1, userBean.getUser().getId());
 				ps.setInt(2, feedId);
-				
+			}
+			
+			if(ps != null)
+			{
 				ResultSet rs = ps.executeQuery();
 				DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 				
@@ -235,9 +255,10 @@ public class ContentBean
 				{
 					//articles = "<span style='display: block; padding-top: 15px; text-align: center; font-size: 18px;'>There are no unread articles.</span>";
 				}
+				
+				ps.close();
 			}
-			
-			ps.close();
+
 			conn.close();
 		}
 		catch(Exception e)
@@ -300,11 +321,13 @@ public class ContentBean
 		this.message = message;
 	}
 
-	public String getFeedName() {
+	public String getFeedName()
+	{
 		return feedName;
 	}
 
-	public void setFeedName(String feedName) {
+	public void setFeedName(String feedName)
+	{
 		this.feedName = feedName;
 	}
 }

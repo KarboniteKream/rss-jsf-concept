@@ -115,7 +115,6 @@ $(document).ready(function()
 	{
 		$("#overlay").fadeIn("fast");
 		$($(this).attr("target-popup")).fadeIn("fast");
-		$("#form-question").text($("#form-question").text().replace("FEED", $("#feed-name").text()));
 	});
 
 	$("input[type='email']").blur(function()
@@ -197,20 +196,6 @@ function markAsRead(element)
 			element.parent().parent().toggleClass("unread");
 			(element.text() == "Mark as read") ? element.text("Mark as unread") : element.text("Mark as read");
 			loadSidebar();
-		}
-	});
-}
-
-function unsubscribe()
-{
-	$.ajax
-	({
-		url: "/util.php?function=unsubscribe",
-		type: "POST",
-		success: function()
-		{
-			hideOverlay();
-			location.reload();
 		}
 	});
 }

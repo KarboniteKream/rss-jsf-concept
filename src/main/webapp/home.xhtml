@@ -40,9 +40,12 @@
 								<li><h:commandLink id="home" value="Home" action="#{utilBean.changeFeed}">
 									<f:setPropertyActionListener value="-1" target="#{contentBean.feedId}" />
 								</h:commandLink></li>
-								<li><h:commandLink id="unread" value="ARCH" action="#{utilBean.changeFeed}">
-									<f:setPropertyActionListener value="-2" target="#{contentBean.feedId}" />
-								</h:commandLink></li>
+								<li>
+									<h:commandLink id="unread" value="Unread " action="#{utilBean.changeFeed}">
+										<f:setPropertyActionListener value="-2" target="#{contentBean.feedId}" />
+									</h:commandLink>
+									<span class="badge"><h:outputText value="#{utilBean.unreadCount}" /></span>
+								</li>
 								<li><h:commandLink id="liked" value="Liked" action="#{utilBean.changeFeed}">
 									<f:setPropertyActionListener value="-3" target="#{contentBean.feedId}" />
 								</h:commandLink></li>
@@ -97,7 +100,7 @@
 			</div>
 			<div id="content">
 				<div class="header">
-					<ui:fragment rendered="#{contentBean.location eq 'feed'}">
+					<ui:fragment rendered="#{contentBean.location eq 'feed' || contentBean.location eq 'unread' || contentBean.location eq 'liked' || contentBean.location eq 'all'}">
 						<span class="button-primary">Refresh</span>
 						<span class="button-secondary">Settings</span>
 						<span class="button-secondary open-popup" target-popup="#unsubscribe">Unsubscribe</span>
@@ -113,7 +116,7 @@
 					</ui:fragment>
 				</div>
 				<div id="reader">
-					<ui:fragment rendered="#{contentBean.location eq 'feed'}">
+					<ui:fragment rendered="#{contentBean.location eq 'feed' || contentBean.location eq 'unread' || contentBean.location eq 'liked' || contentBean.location eq 'all'}">
 						<ui:repeat var="article" value="#{contentBean.articles}">
 							<article id="#{article.id}" class="unread">
 								<div class="date">#{article.date}</div>
@@ -129,7 +132,7 @@
 					</ui:fragment>
 					<ui:fragment rendered="#{contentBean.location eq 'home'}">
 						<div class="home-left">
-							<h2 class="notice">You have 7 unread articles.</h2>
+							<h2 class="notice">You have <h:outputText value="#{utilBean.unreadCount}" /> unread articles.</h2>
 							<div id="widgets">
 								<img src="http://imgs.xkcd.com/comics/time.png" title="The end." alt="The current time is unknown" />
 							</div>
@@ -157,13 +160,13 @@
 				<span class="button-secondary" onclick="hideOverlay()">×</span>
 				<h3>Unsubscribe</h3>
 			</div>
-			<form action="javascript:unsubscribe()" method="post">
+			<h:form method="post">
 				<fieldset>
 					<span id="form-question">Are you sure you want to unsubscribe from <h:outputText value="#{contentBean.feedName}" />?</span>
-					<button type="submit" tabindex="2">Yes</button>
+					<h:commandButton value="Yes" action="#{utilBean.unsubscribe}" tabindex="2" />
 					<button id="unsubscribe-button" type="button" class="button-secondary" onclick="hideOverlay()" tabindex="1">No</button>
 				</fieldset>
-			</form>
+			</h:form>
 		</div>
 	</h:body>
 </html>

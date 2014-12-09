@@ -23,6 +23,7 @@ public class UtilBean
 	@ManagedProperty(value = "#{contentBean}")
 	private ContentBean contentBean;
 	
+	private int unreadCount;
 	private int articleId;
 	
 	public UtilBean()
@@ -50,8 +51,6 @@ public class UtilBean
 		
 		try
 		{
-			conn = ds.getConnection();
-			
 			switch(contentBean.getFeedId())
 			{
 				case -1:
@@ -65,7 +64,7 @@ public class UtilBean
 				break;
 
 				case -3:
-					contentBean.setLocation("home");
+					contentBean.setLocation("liked");
 					contentBean.setFeedName("Liked articles");
 				break;
 
@@ -75,6 +74,7 @@ public class UtilBean
 				break;
 				
 				default:
+					conn = ds.getConnection();
 					ps = conn.prepareStatement("SELECT name FROM Feeds WHERE id = ?");
 					ps.setInt(1, contentBean.getFeedId());
 					
@@ -87,10 +87,9 @@ public class UtilBean
 					}
 					
 					ps.close();
+					conn.close();
 				break;
 			}
-
-			conn.close();
 		}
 		catch(Exception e)
 		{
@@ -112,6 +111,64 @@ public class UtilBean
 	
 	public String unsubscribe()
 	{
-		return "success";
+		Connection conn = null;
+		PreparedStatement ps = null;
+		
+		try
+		{
+			conn = ds.getConnection();
+			ps = conn.prepareStatement("DELETE FROM Subscriptions WHERE user_id = ? AND feed_id = ?");
+			ps.setInt(1, contentBean.getUserBean().getUser().getId());
+			ps.setInt(2, contentBean.getFeedId());
+			
+			ps.executeUpdate();
+			
+			contentBean.setLocation("home");
+			contentBean.setFeedId(-1);
+			contentBean.setFeedName("Home");
+			
+			ps.close();
+			conn.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return "home.xhtml?faces-redirect=true";
+	}
+	
+	public int getUnreadCount()
+	{
+		Connection conn = null;
+		PreparedStatement ps = null;
+		
+		try
+		{
+			conn = ds.getConnection();
+			ps = conn.prepareStatement("SELECT COUNT(article_id) AS unread FROM Unread WHERE user_id = ?");
+			ps.setInt(1, contentBean.getUserBean().getUser().getId());
+			
+			ResultSet rs = ps.executeQuery();
+			
+			if(rs.first() == true)
+			{
+				unreadCount = rs.getInt("unread");
+			}
+			
+			ps.close();
+			conn.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return unreadCount;
+	}
+	
+	public void setUnreadCount(int unreadCount)
+	{
+		this.unreadCount = unreadCount;
 	}
 }
