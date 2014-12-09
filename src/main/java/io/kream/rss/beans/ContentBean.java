@@ -31,7 +31,9 @@ public class ContentBean
 	private UserBean userBean;
 	
 	private String location;
-	private int feedId;	
+	
+	private int feedId;
+	private String feedName;
 	
 	private String message;
 
@@ -51,8 +53,10 @@ public class ContentBean
 			e.printStackTrace();
 		}
 
-		location = "home";
-		feedId = 1;
+		location = "feed";
+		
+		feedId = 26;
+		setFeedName("Phoronix?");
 		
 		setArticles(new ArrayList<Article>());
 		setFeatured(new ArrayList<Article>());
@@ -205,13 +209,12 @@ public class ContentBean
 		Connection conn = null;
 		PreparedStatement ps = null;
 		
-		articles.clear();
-		
 		try
 		{
 			conn = ds.getConnection();
+			articles.clear();
 			
-			if(location.equals("feed"))
+			if(location.equals("feed") && userBean.getUser().getId() != -1)
 			{
 				ps = conn.prepareStatement("SELECT a.id, a.title, a.url, a.author, a.date, a.content FROM Users u JOIN Unread ur ON u.id = ur.user_id JOIN Articles a ON ur.article_id = a.id JOIN Feeds f ON a.feed_id = f.id WHERE u.id = ? AND f.id = ? ORDER BY a.date DESC");
 				ps.setInt(1, userBean.getUser().getId());
@@ -220,16 +223,12 @@ public class ContentBean
 				ResultSet rs = ps.executeQuery();
 				DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 				
-				boolean empty = true;
-				
 				while(rs.next() == true)
 				{
-					empty = false;
-					
 					articles.add(new Article(rs.getInt("id"), rs.getString("title"), rs.getString("url"), rs.getString("author"), df.format(rs.getDate("date")), rs.getString("content")));
 				}
 				
-				if(empty == true)
+				if(articles.size() > 0)
 				{
 					//articles = "<span style='display: block; padding-top: 15px; text-align: center; font-size: 18px;'>There are no unread articles.</span>";
 				}
@@ -296,5 +295,13 @@ public class ContentBean
 	public void setMessage(String message)
 	{
 		this.message = message;
+	}
+
+	public String getFeedName() {
+		return feedName;
+	}
+
+	public void setFeedName(String feedName) {
+		this.feedName = feedName;
 	}
 }

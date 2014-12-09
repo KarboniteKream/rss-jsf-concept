@@ -633,7 +633,8 @@ article.liked .action-bar span
 	width: 100%;
 }
 
-.popup form input[type="submit"]
+.popup form input[type="submit"],
+.popup form button
 {
 	margin-left: 15px;
 }
@@ -665,7 +666,8 @@ fieldset
 	font-size: 14px;
 }
 
-fieldset input[type="submit"]
+fieldset input[type="submit"],
+fieldset button
 {
 	float: right;
 	background-color: #428BCA;
@@ -674,7 +676,8 @@ fieldset input[type="submit"]
 	border-radius: 4px;
 }
 
-.popup fieldset input[type="submit"]
+.popup fieldset input[type="submit"],
+.popup fieldset button
 {
 	margin-top: 15px;
 	width: 75px;

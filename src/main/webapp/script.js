@@ -333,7 +333,6 @@ function loadFeed()
 					{
 						$("#overlay").fadeIn("fast");
 						$($(this).attr("target-popup")).fadeIn("fast");
-						$("#form-question").text($("#form-question").text().replace("FEED", $("#feed-name").text()));
 					});
 
 					$("#reader").empty();

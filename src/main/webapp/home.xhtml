@@ -34,6 +34,10 @@
 					</form>
 				</div>
 				<div id="sidebar-content">
+					<h:form>
+						<h:commandButton value="ARCH" action="#{utilBean.changeFeed(1)}" />
+						<h:outputText value="#{contentBean.feedId}"></h:outputText>
+					</h:form>
 					<h:outputText value="#{contentBean.sidebar}" escape="false" />
 				</div>
 			</div>
@@ -43,7 +47,7 @@
 						<span class="button-primary">Refresh</span>
 						<span class="button-secondary">Settings</span>
 						<span class="button-secondary open-popup" target-popup="#unsubscribe">Unsubscribe</span>
-						<h2 id="feed-name"></h2>
+						<h2 id="feed-name"><h:outputText value="#{contentBean.feedName}" /></h2>
 					</ui:fragment>
 					<ui:fragment rendered="#{contentBean.location eq 'home'}">
 						<div class="header-secondary">
@@ -101,7 +105,7 @@
 			</div>
 			<form action="javascript:unsubscribe()" method="post">
 				<fieldset>
-					<span id="form-question">Are you sure you want to unsubscribe from FEED?</span>
+					<span id="form-question">Are you sure you want to unsubscribe from <h:outputText value="#{contentBean.feedName}" />?</span>
 					<button type="submit" tabindex="2">Yes</button>
 					<button id="unsubscribe-button" type="button" class="button-secondary" onclick="hideOverlay()" tabindex="1">No</button>
 				</fieldset>

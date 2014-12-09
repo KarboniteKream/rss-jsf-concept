@@ -8,7 +8,7 @@ public class Article
 	private String author;
 	private String date;
 	private String content;
-	
+
 	public Article(int id, String title, String url, String author, String date, String content)
 	{
 		this.setId(id);

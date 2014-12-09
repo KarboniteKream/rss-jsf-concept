@@ -1,3 +1,2 @@
 personalized featured articles
 count unread
-fix submit button
