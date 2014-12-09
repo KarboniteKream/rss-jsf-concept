@@ -8,8 +8,11 @@ public class Article
 	private String author;
 	private String date;
 	private String content;
+	
+	private boolean liked;
+	private boolean unread;
 
-	public Article(int id, String title, String url, String author, String date, String content)
+	public Article(int id, String title, String url, String author, String date, String content, boolean liked, boolean unread)
 	{
 		this.setId(id);
 		this.setTitle(title);
@@ -17,6 +20,9 @@ public class Article
 		this.setAuthor(author);
 		this.setDate(date);
 		this.setContent(content);
+		
+		this.liked = liked;
+		this.unread = unread;
 	}
 
 	public int getId()
@@ -77,5 +83,25 @@ public class Article
 	public void setContent(String content)
 	{
 		this.content = content;
+	}
+
+	public boolean isLiked()
+	{
+		return liked;
+	}
+
+	public void setLiked(boolean liked)
+	{
+		this.liked = liked;
+	}
+
+	public boolean isUnread()
+	{
+		return unread;
+	}
+
+	public void setUnread(boolean unread)
+	{
+		this.unread = unread;
 	}
 }

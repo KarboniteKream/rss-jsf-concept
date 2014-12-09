@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:head>
+		<title>kream</title>
+		<meta charset="UTF-8" />
+		<link href="/resources/kream.png" rel="icon" type="image/png" />
+		<link href="style.css" rel="stylesheet" type="text/css" />
+		<script src="//code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+		<script src="scripts/html.sortable.min.js" type="text/javascript"></script>
+		<script src="script.js" type="text/javascript"></script>
+	</h:head>
+	<h:body>
+		<header>
+			<h1><a href="/">kream.io</a><span class="version"> rss</span></h1>
+			<nav>
+				<ul>
+					<li><a href="/home.xhtml">Home</a></li>
+					<li><a href="/settings.html">Settings</a></li>
+					<li><a href="/help.xhtml" class="active">Help</a></li>
+					<li><a href="/">Sign out</a></li>
+				</ul>
+			</nav>
+		</header>
+		<div id="main">
+			<div id="sidebar">
+				<span id="new-subscription" class="button-primary block">New subscription</span>
+				<div id="add-subscription">
+					<form action="javascript:;" method="post">
+						<fieldset>
+							<button type="submit" tabindex="2">Add</button>
+							<input type="url" placeholder="subscription URL" tabindex="1"/>
+						</fieldset>
+					</form>
+				</div>
+				<div id="sidebar-content">
+					<h:form id="sidebar-form">
+						<div id="menu">
+							<ul>
+								<li><h:commandLink id="home" value="Home" action="#{utilBean.changeFeed}">
+									<f:setPropertyActionListener value="-1" target="#{contentBean.feedId}" />
+								</h:commandLink></li>
+								<li>
+									<h:commandLink id="unread" value="Unread " action="#{utilBean.changeFeed}">
+										<f:setPropertyActionListener value="-2" target="#{contentBean.feedId}" />
+									</h:commandLink>
+									<span class="badge"><h:outputText value="#{utilBean.unreadCount}" /></span>
+								</li>
+								<li><h:commandLink id="liked" value="Liked" action="#{utilBean.changeFeed}">
+									<f:setPropertyActionListener value="-3" target="#{contentBean.feedId}" />
+								</h:commandLink></li>
+								<li><h:commandLink id="all" value="All articles" action="#{utilBean.changeFeed}">
+									<f:setPropertyActionListener value="-4" target="#{contentBean.feedId}" />
+								</h:commandLink></li>
+							</ul>
+						</div>
+						<div id="subscriptions">
+							<ui:repeat var="folder" value="#{contentBean.folders}" size="1">
+								<ui:fragment rendered="#{folder eq null}">
+									<ul class="connected sortable">
+										<ui:repeat var="feed" value="#{contentBean.feeds}">
+											<li>
+												<h:commandLink value="#{feed.name}" style="#{feed.icon}" action="#{utilBean.changeFeed}">
+													<f:setPropertyActionListener value="#{feed.id}" target="#{contentBean.feedId}" />
+												</h:commandLink>
+												<ui:fragment rendered="#{feed.unread ne 0}">
+													<span class="badge"><h:outputText value="#{feed.unread}" /></span>
+												</ui:fragment>
+											</li>
+										</ui:repeat>
+									</ul>
+								</ui:fragment>
+							</ui:repeat>
+							<ul>
+								<ui:repeat var="folder" value="#{contentBean.folders}">
+									<ui:fragment rendered="#{folder ne null}">
+										<li class="folder">
+											<input type="checkbox" id="#{folder}-folder" />
+											<label for="#{folder}-folder"><h:outputText value="#{folder}" /></label>
+											<ul class="connected sortable">
+												<ui:repeat var="feed" value="#{contentBean.folderFeeds}">
+													<li>
+														<h:commandLink value="#{feed.name}" style="#{feed.icon}" action="#{utilBean.changeFeed}">
+															<f:setPropertyActionListener value="#{feed.id}" target="#{contentBean.feedId}" />
+														</h:commandLink>
+														<ui:fragment rendered="#{feed.unread ne 0}">
+															<span class="badge"><h:outputText value="#{feed.unread}" /></span>
+														</ui:fragment>
+													</li>
+												</ui:repeat>
+												<li class='empty-li' />
+											</ul>
+										</li>
+									</ui:fragment>
+								</ui:repeat>
+							</ul>
+						</div>
+					</h:form>
+				</div>
+			</div>
+			<div id="content">
+				<div class="header">
+					<h2>Help</h2>
+				</div>
+				<div id="reader">
+					<div id="banner">work in progress</div>
+				</div>
+			</div>
+		</div>
+	</h:body>
+</html>

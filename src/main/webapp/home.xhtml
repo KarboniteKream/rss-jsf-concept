@@ -15,9 +15,9 @@
 			<h1><a href="/">kream.io</a><span class="version"> rss</span></h1>
 			<nav>
 				<ul>
-					<li><a href="/home.php" class="active">Home</a></li>
+					<li><a href="/home.xhtml" class="active">Home</a></li>
 					<li><a href="/settings.php">Settings</a></li>
-					<li><a href="/help.html">Help</a></li>
+					<li><a href="/help.xhtml">Help</a></li>
 					<li><a href="util.php?function=sign-out">Sign out</a></li>
 				</ul>
 			</nav>
@@ -37,19 +37,19 @@
 					<h:form id="sidebar-form">
 						<div id="menu">
 							<ul>
-								<li><h:commandLink id="home" value="Home" action="#{utilBean.changeFeed}">
+								<li><h:commandLink id="home" styleClass="#{contentBean.location eq 'home' ? 'active' : ''}" value="Home" action="#{utilBean.changeFeed}">
 									<f:setPropertyActionListener value="-1" target="#{contentBean.feedId}" />
 								</h:commandLink></li>
 								<li>
-									<h:commandLink id="unread" value="Unread " action="#{utilBean.changeFeed}">
+									<h:commandLink id="unread" styleClass="#{contentBean.location eq 'unread' ? 'active' : ''}" value="Unread " action="#{utilBean.changeFeed}">
 										<f:setPropertyActionListener value="-2" target="#{contentBean.feedId}" />
 									</h:commandLink>
 									<span class="badge"><h:outputText value="#{utilBean.unreadCount}" /></span>
 								</li>
-								<li><h:commandLink id="liked" value="Liked" action="#{utilBean.changeFeed}">
+								<li><h:commandLink id="liked" styleClass="#{contentBean.location eq 'liked' ? 'active' : ''}" value="Liked" action="#{utilBean.changeFeed}">
 									<f:setPropertyActionListener value="-3" target="#{contentBean.feedId}" />
 								</h:commandLink></li>
-								<li><h:commandLink id="all" value="All articles" action="#{utilBean.changeFeed}">
+								<li><h:commandLink id="all" styleClass="#{contentBean.location eq 'all' ? 'active' : ''}" value="All articles" action="#{utilBean.changeFeed}">
 									<f:setPropertyActionListener value="-4" target="#{contentBean.feedId}" />
 								</h:commandLink></li>
 							</ul>
@@ -60,9 +60,16 @@
 									<ul class="connected sortable">
 										<ui:repeat var="feed" value="#{contentBean.feeds}">
 											<li>
-												<h:commandLink value="#{feed.name}" style="#{feed.icon}" action="#{utilBean.changeFeed}">
-													<f:setPropertyActionListener value="#{feed.id}" target="#{contentBean.feedId}" />
-												</h:commandLink>
+												<ui:fragment rendered="#{feed.id eq contentBean.feedId}">
+													<h:commandLink value="#{feed.name}" styleClass="active" style="#{feed.icon}" action="#{utilBean.changeFeed}">
+														<f:setPropertyActionListener value="#{feed.id}" target="#{contentBean.feedId}" />
+													</h:commandLink>
+												</ui:fragment>
+												<ui:fragment rendered="#{feed.id ne contentBean.feedId}">
+													<h:commandLink value="#{feed.name}" style="#{feed.icon}" action="#{utilBean.changeFeed}">
+														<f:setPropertyActionListener value="#{feed.id}" target="#{contentBean.feedId}" />
+													</h:commandLink>
+												</ui:fragment>
 												<ui:fragment rendered="#{feed.unread ne 0}">
 													<span class="badge"><h:outputText value="#{feed.unread}" /></span>
 												</ui:fragment>
@@ -80,9 +87,16 @@
 											<ul class="connected sortable">
 												<ui:repeat var="feed" value="#{contentBean.folderFeeds}">
 													<li>
-														<h:commandLink value="#{feed.name}" style="#{feed.icon}" action="#{utilBean.changeFeed}">
-															<f:setPropertyActionListener value="#{feed.id}" target="#{contentBean.feedId}" />
-														</h:commandLink>
+														<ui:fragment rendered="#{feed.id eq contentBean.feedId}">
+															<h:commandLink value="#{feed.name}" styleClass="active" style="#{feed.icon}" action="#{utilBean.changeFeed}">
+																<f:setPropertyActionListener value="#{feed.id}" target="#{contentBean.feedId}" />
+															</h:commandLink>
+														</ui:fragment>
+														<ui:fragment rendered="#{feed.id ne contentBean.feedId}">
+															<h:commandLink value="#{feed.name}" style="#{feed.icon}" action="#{utilBean.changeFeed}">
+																<f:setPropertyActionListener value="#{feed.id}" target="#{contentBean.feedId}" />
+															</h:commandLink>
+														</ui:fragment>
 														<ui:fragment rendered="#{feed.unread ne 0}">
 															<span class="badge"><h:outputText value="#{feed.unread}" /></span>
 														</ui:fragment>
@@ -118,14 +132,24 @@
 				<div id="reader">
 					<ui:fragment rendered="#{contentBean.location eq 'feed' || contentBean.location eq 'unread' || contentBean.location eq 'liked' || contentBean.location eq 'all'}">
 						<ui:repeat var="article" value="#{contentBean.articles}">
-							<article id="#{article.id}" class="unread">
+							<article id="#{article.id}" class="#{article.liked ? 'liked' : 'unread'}">
 								<div class="date">#{article.date}</div>
 								<h2><a href="#{article.url}">#{article.title}</a></h2>
 								<ui:fragment rendered="#{not empty article.author}"><div class="author">by <b>#{article.author}</b></div></ui:fragment>
 								<div class="content"><p><h:outputText value="#{article.content}" escape="false" /></p></div>
 								<div class="action-bar">
-									<span>Like</span>
-									<span>Mark as read</span>
+									<ui:fragment rendered="#{article.liked}">
+										<span>Unlike</span>
+										<span>Mark as unread</span>
+									</ui:fragment>
+									<ui:fragment rendered="#{article.unread}">
+										<span>Like</span>
+										<span>Mark as read</span>
+									</ui:fragment>
+									<ui:fragment rendered="#{not article.unread and not article.liked}">
+										<span>Like</span>
+										<span>Mark as unread</span>
+									</ui:fragment>
 								</div>
 							</article>
 						</ui:repeat>

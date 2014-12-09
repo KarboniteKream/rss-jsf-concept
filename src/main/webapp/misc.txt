@@ -1,3 +1,1 @@
 personalized featured articles
-count unread
-active

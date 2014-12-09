@@ -167,21 +167,10 @@ $(document).ready(function()
 
 function like(element)
 {
-	// TODO: Check status in database.
-	$.ajax
-	({
-		url: "/util.php?function=like",
-		type: "POST",
-		data: { "article_id": element.parent().parent().attr("id"), "liked": element.parent().parent().hasClass("liked") ? "true" : "false" },
-		success: function(data)
-		{
-			element.parent().parent().toggleClass("liked");
-			(element.text() == "Like") ? element.text("Unlike") : element.text("Like");
-			element.parent().parent().removeClass("unread");
-			element.next().text("Mark as unread");
-			loadSidebar();
-		}
-	});
+	element.parent().parent().toggleClass("liked");
+	(element.text() == "Like") ? element.text("Unlike") : element.text("Like");
+	element.parent().parent().removeClass("unread");
+	element.next().text("Mark as unread");
 }
 
 function markAsRead(element)

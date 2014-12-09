@@ -208,6 +208,11 @@ public class ContentBean
 		
 		return folderFeeds;
 	}
+	
+	public List<Feed> getParam(int id)
+	{
+		return feeds.get(0);
+	}
 
 	public List<Article> getArticles()
 	{
@@ -248,7 +253,18 @@ public class ContentBean
 				
 				while(rs.next() == true)
 				{
-					articles.add(new Article(rs.getInt("id"), rs.getString("title"), rs.getString("url"), rs.getString("author"), df.format(rs.getDate("date")), rs.getString("content")));
+					if(location.equals("feed") == true || location.equals("unread"))
+					{
+						articles.add(new Article(rs.getInt("id"), rs.getString("title"), rs.getString("url"), rs.getString("author"), df.format(rs.getDate("date")), rs.getString("content"), false, true));
+					}
+					else if(location.equals("liked") == true)
+					{
+						articles.add(new Article(rs.getInt("id"), rs.getString("title"), rs.getString("url"), rs.getString("author"), df.format(rs.getDate("date")), rs.getString("content"), true, false));
+					}
+					else if(location.equals("all") == true)
+					{
+						articles.add(new Article(rs.getInt("id"), rs.getString("title"), rs.getString("url"), rs.getString("author"), df.format(rs.getDate("date")), rs.getString("content"), rs.getInt("liked") > 0, rs.getInt("unread") > 0));
+					}
 				}
 				
 				if(articles.size() > 0)
@@ -292,7 +308,7 @@ public class ContentBean
 			while(rs.next() == true)
 			{
 				// number of likes
-				featured.add(new Article(rs.getInt("id"), rs.getString("title"), rs.getString("url"), rs.getString("author"), df.format(rs.getDate("date")), rs.getString("content")));
+				featured.add(new Article(rs.getInt("id"), rs.getString("title"), rs.getString("url"), rs.getString("author"), df.format(rs.getDate("date")), rs.getString("content"), false, false));
 			}
 			
 			ps.close();
