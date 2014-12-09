@@ -17,7 +17,6 @@ import javax.sql.DataSource;
 @SessionScoped
 public class UserBean
 {
-	// @Resource(name = "jdbc/database")
 	private DataSource ds;
 	
 	private User user;

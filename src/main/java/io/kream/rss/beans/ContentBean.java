@@ -21,11 +21,10 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 @ManagedBean(name = "contentBean")
-// request?
+// request scoped?
 @SessionScoped
 public class ContentBean
 {
-//	@Resource(name = "jdbc/database")
 	private DataSource ds;
 	
 	@ManagedProperty(value = "#{userBean}")
