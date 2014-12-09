@@ -1,6 +1,7 @@
 package io.kream.rss.beans;
 
 import io.kream.rss.entities.Article;
+import io.kream.rss.entities.Feed;
 
 import java.sql.Blob;
 import java.sql.Connection;
@@ -37,7 +38,7 @@ public class ContentBean
 	
 	private String message;
 
-	private String sidebar;
+	private List<Feed> feeds;
 	private List<Article> articles;
 	private List<Article> featured;
 	
@@ -58,6 +59,7 @@ public class ContentBean
 		feedId = 26;
 		setFeedName("Phoronix?");
 		
+		setFeeds(new ArrayList<Feed>());
 		setArticles(new ArrayList<Article>());
 		setFeatured(new ArrayList<Article>());
 	}
@@ -87,111 +89,102 @@ public class ContentBean
 		this.feedId = feedId;
 	}
 	
-	public String getSidebar()
+	public List<Feed> getFeeds()
 	{
 		Connection conn = null;
 		PreparedStatement ps = null;
 		
-		sidebar = "";
-		
 		try
 		{
 			conn = ds.getConnection();
+			feeds.clear();
 			
-			ps = conn.prepareStatement("SELECT COUNT(article_id) AS unread FROM Unread WHERE user_id = ?");
-			ps.setInt(1, userBean.getUser().getId());
-			ResultSet rs = ps.executeQuery();
-			rs.first();
-			int unread = rs.getInt("unread");
-			
-			sidebar += "<div id='menu'><ul>";
-			sidebar += "<li><a id='home' feed='home' href='javascript:;'>Home</a></li>";
-			sidebar += "<li><a id='unread' feed='unread' href='javascript:;'>Unread</a> ";
-			if(unread > 0)
-			{
-				sidebar += String.format("<span class='badge'>%d</span></li>", unread);
-			}
-			sidebar += "<li><a id='liked' feed='liked' href='javascript:;'>Liked</a></li>";
-			sidebar += "<li><a id='all' feed='all' href='javascript:;'>All articles</a></li>";
-			sidebar += "</ul></div>";
-			
-			ps.close();
+//			ps = conn.prepareStatement("SELECT COUNT(article_id) AS unread FROM Unread WHERE user_id = ?");
+//			ps.setInt(1, userBean.getUser().getId());
+//			ResultSet rs = ps.executeQuery();
+//			rs.first();
+//			int unread = rs.getInt("unread");
+//			
+//			sidebar += "<div id='menu'><ul>";
+//			sidebar += "<li><a id='unread' feed='unread' href='javascript:;'>Unread</a> ";
+//			if(unread > 0)
+//			{
+//				sidebar += String.format("<span class='badge'>%d</span></li>", unread);
+//			}
+//			sidebar += "</ul></div>";
+//			
+//			ps.close();
 			
 			ps = conn.prepareStatement("SELECT s.folder, f.id, f.name, f.icon, u.unread FROM Subscriptions s JOIN Feeds f ON s.feed_id = f.id LEFT JOIN (SELECT a.feed_id, COUNT(a.feed_id) AS unread FROM Unread JOIN Articles a ON article_id = a.id WHERE user_id = ? GROUP BY feed_id) AS u ON f.id = u.feed_id WHERE s.user_id = ? ORDER BY s.folder, f.name");
 			ps.setInt(1, userBean.getUser().getId());
 			ps.setInt(2, userBean.getUser().getId());
 			
-			rs = ps.executeQuery();
-			
-			sidebar += "<div id='subscriptions'><ul class='connected sortable'>";
+			ResultSet rs = ps.executeQuery();
 			
 			while(rs.next() == true)
 			{
-				int id = rs.getInt("id");
-				String folder = rs.getString("folder");
-				unread = rs.getInt("unread");
-				
-				if(folder != null)
-				{
-					rs.previous();
-					break;
-				}
-				
-				Blob blob = rs.getBlob("icon");
-				String iconStr = Base64.getEncoder().encodeToString(blob.getBytes(1, (int)blob.length()));
-				
-				sidebar += String.format("<li><a feed='%d' href='javascript:;' class='%s'",
-						id, feedId == id ? "active" : "");
-				
-				if(iconStr.equals("") == false)
-				{
-					sidebar += String.format("style='background-image: url(data:image/png;base64,%s);'", iconStr);
-				}
-				
-				sidebar += String.format(">%s</a> ", rs.getString("name"));
-				
-				if(unread > 0)
-				{
-					sidebar += String.format("<span class='badge'>%d</span>", unread);
-				}
-				
-				sidebar += "</li>";
+				feeds.add(new Feed(rs.getInt("id"), rs.getString("name"), rs.getBlob("icon"), rs.getInt("unread"), rs.getString("folder")));
+//				String folder = rs.getString("folder");
+//				unread = rs.getInt("unread");
+//				
+//				if(folder != null)
+//				{
+//					rs.previous();
+//					break;
+//				}
+//				
+//				sidebar += String.format("<li><a feed='%d' href='javascript:;' class='%s'",
+//						id, feedId == id ? "active" : "");
+//				
+//				if(iconStr.equals("") == false)
+//				{
+//					sidebar += String.format("style='background-image: url(data:image/png;base64,%s);'", iconStr);
+//				}
+//				
+//				sidebar += String.format(">%s</a> ", rs.getString("name"));
+//				
+//				if(unread > 0)
+//				{
+//					sidebar += String.format("<span class='badge'>%d</span>", unread);
+//				}
+//				
+//				sidebar += "</li>";
 			}
-			
-			sidebar += "</ul><ul>";
-
-			String prevFolder = null;
-			
-			while(rs.next() == true)
-			{
-				int id = rs.getInt("id");
-				String folder = rs.getString("folder");
-				unread = rs.getInt("unread");
-				
-				if(folder.equals(prevFolder) == false)
-				{
-					if(prevFolder != null)
-					{
-						sidebar += "<li class='empty-li' /></ul></li>";
-					}
-					
-					prevFolder = folder;
-					sidebar += String.format("<li class='folder'><input type='checkbox' id='folder-toggle' /><label for='folder-toggle'>%s</label><ul class='connected sortable'>", folder);
-				}
-				
-				//icon badge
-				sidebar += String.format("<li><a feed='%d' href='javascript:;' class='%s'>%s</a> ", id, feedId == id ? "active" : "", rs.getString("name"));
-
-				if(unread > 0)
-				{
-					sidebar += String.format("<span class='badge'>%d</span>", unread);
-				}
-				
-				sidebar += "</li>";
-			}
-
-			sidebar += "<li class='empty-li' /></ul></li>";
-			sidebar += "</ul></div>";
+//			
+//			sidebar += "</ul><ul>";
+//
+//			String prevFolder = null;
+//			
+//			while(rs.next() == true)
+//			{
+//				int id = rs.getInt("id");
+//				String folder = rs.getString("folder");
+//				unread = rs.getInt("unread");
+//				
+//				if(folder.equals(prevFolder) == false)
+//				{
+//					if(prevFolder != null)
+//					{
+//						sidebar += "<li class='empty-li' /></ul></li>";
+//					}
+//					
+//					prevFolder = folder;
+//					sidebar += String.format("<li class='folder'><input type='checkbox' id='folder-toggle' /><label for='folder-toggle'>%s</label><ul class='connected sortable'>", folder);
+//				}
+//				
+//				//icon badge
+//				sidebar += String.format("<li><a feed='%d' href='javascript:;' class='%s'>%s</a> ", id, feedId == id ? "active" : "", rs.getString("name"));
+//
+//				if(unread > 0)
+//				{
+//					sidebar += String.format("<span class='badge'>%d</span>", unread);
+//				}
+//				
+//				sidebar += "</li>";
+//			}
+//
+//			sidebar += "<li class='empty-li' /></ul></li>";
+//			sidebar += "</ul></div>";
 			
 			ps.close();
 			conn.close();
@@ -201,7 +194,12 @@ public class ContentBean
 			e.printStackTrace();
 		}
 
-		return sidebar;
+		return feeds;
+	}
+	
+	public void setFeeds(List<Feed> feeds)
+	{
+		this.feeds = feeds;
 	}
 	
 	public List<Article> getArticles()
@@ -213,10 +211,10 @@ public class ContentBean
 		{
 			conn = ds.getConnection();
 			articles.clear();
+			ps = conn.prepareStatement("SELECT a.id, a.title, a.url, a.author, a.date, a.content FROM Users u JOIN Unread ur ON u.id = ur.user_id JOIN Articles a ON ur.article_id = a.id JOIN Feeds f ON a.feed_id = f.id WHERE u.id = ? AND f.id = ? ORDER BY a.date DESC");
 			
 			if(location.equals("feed") && userBean.getUser().getId() != -1)
 			{
-				ps = conn.prepareStatement("SELECT a.id, a.title, a.url, a.author, a.date, a.content FROM Users u JOIN Unread ur ON u.id = ur.user_id JOIN Articles a ON ur.article_id = a.id JOIN Feeds f ON a.feed_id = f.id WHERE u.id = ? AND f.id = ? ORDER BY a.date DESC");
 				ps.setInt(1, userBean.getUser().getId());
 				ps.setInt(2, feedId);
 				

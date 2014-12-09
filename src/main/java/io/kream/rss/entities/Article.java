@@ -19,51 +19,63 @@ public class Article
 		this.setContent(content);
 	}
 
-	public int getId() {
+	public int getId()
+	{
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(int id)
+	{
 		this.id = id;
 	}
 
-	public String getTitle() {
+	public String getTitle()
+	{
 		return title;
 	}
 
-	public void setTitle(String title) {
+	public void setTitle(String title)
+	{
 		this.title = title;
 	}
 
-	public String getUrl() {
+	public String getUrl()
+	{
 		return url;
 	}
 
-	public void setUrl(String url) {
+	public void setUrl(String url)
+	{
 		this.url = url;
 	}
 
-	public String getAuthor() {
+	public String getAuthor()
+	{
 		return author;
 	}
 
-	public void setAuthor(String author) {
+	public void setAuthor(String author)
+	{
 		this.author = author;
 	}
 
-	public String getDate() {
+	public String getDate()
+	{
 		return date;
 	}
 
-	public void setDate(String date) {
+	public void setDate(String date)
+	{
 		this.date = date;
 	}
 
-	public String getContent() {
+	public String getContent()
+	{
 		return content;
 	}
 
-	public void setContent(String content) {
+	public void setContent(String content)
+	{
 		this.content = content;
 	}
 }

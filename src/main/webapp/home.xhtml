@@ -34,11 +34,33 @@
 					</form>
 				</div>
 				<div id="sidebar-content">
-					<h:form>
-						<h:commandButton value="ARCH" action="#{utilBean.changeFeed(1)}" />
-						<h:outputText value="#{contentBean.feedId}"></h:outputText>
+					<h:form id="sidebar-form">
+						<div id="menu">
+							<ul>
+								<li><h:commandLink id="home" value="Home" action="#{utilBean.changeFeed}">
+									<f:setPropertyActionListener value="-1" target="#{contentBean.feedId}" />
+								</h:commandLink></li>
+								<li><h:commandLink id="unread" value="ARCH" action="#{utilBean.changeFeed}">
+									<f:setPropertyActionListener value="-2" target="#{contentBean.feedId}" />
+								</h:commandLink></li>
+								<li><h:commandLink id="liked" value="Liked" action="#{utilBean.changeFeed}">
+									<f:setPropertyActionListener value="-3" target="#{contentBean.feedId}" />
+								</h:commandLink></li>
+								<li><h:commandLink id="all" value="All articles" action="#{utilBean.changeFeed}">
+									<f:setPropertyActionListener value="-4" target="#{contentBean.feedId}" />
+								</h:commandLink></li>
+							</ul>
+						</div>
+						<div id="subscriptions">
+							<ul class="connected sortable">
+								<ui:repeat var="feed" value="#{contentBean.feeds}">
+									<li><h:commandLink value="#{feed.name}" style="#{feed.icon}" action="#{utilBean.changeFeed}">
+										<f:setPropertyActionListener value="#{feed.id}" target="#{contentBean.feedId}" />
+									</h:commandLink></li>
+								</ui:repeat>
+							</ul>
+						</div>
 					</h:form>
-					<h:outputText value="#{contentBean.sidebar}" escape="false" />
 				</div>
 			</div>
 			<div id="content">

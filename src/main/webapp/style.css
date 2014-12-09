@@ -355,22 +355,22 @@ p
 	color: #609AC9;
 }
 
-#home
+#sidebar-form\:home
 {
 	background-image: url("resources/home.png");
 }
 
-#unread
+#sidebar-form\:unread
 {
 	background-image: url("resources/unread.png");
 }
 
-#liked
+#sidebar-form\:liked
 {
 	background-image: url("resources/liked.png");
 }
 
-#all
+#sidebar-form\:all
 {
 	background-image: url("resources/all.png");
 }

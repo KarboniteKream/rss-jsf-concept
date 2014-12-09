@@ -5,8 +5,6 @@ import io.kream.rss.entities.Article;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -45,7 +43,7 @@ public class UtilBean
 		this.contentBean = contentBean;
 	}
 	
-	public String changeFeed(String id)
+	public String changeFeed()
 	{
 		Connection conn = null;
 		PreparedStatement ps = null;
@@ -54,21 +52,40 @@ public class UtilBean
 		{
 			conn = ds.getConnection();
 			
-			ps = conn.prepareStatement("SELECT name FROM Feeds WHERE id = ?");
-			ps.setInt(1, Integer.parseInt(id));
-			
-			ResultSet rs = ps.executeQuery();
-			
-			if(rs.first() == true)
+			switch(contentBean.getFeedId())
 			{
-				contentBean.setLocation("feed");
-				contentBean.setFeedId(Integer.parseInt(id));
-				contentBean.setFeedName(rs.getString("name"));
+				case -1:
+					contentBean.setLocation("home");
+					contentBean.setFeedName("Home");
+				break;
+
+				case -2:
+				break;
+
+				case -3:
+				break;
+
+				case -4:
+				break;
 				
-				return "home.xhtml?faces-redirect=true";
+				default:
+					// keep id in this bean?
+					ps = conn.prepareStatement("SELECT name FROM Feeds WHERE id = ?");
+					ps.setInt(1, contentBean.getFeedId());
+					
+					ResultSet rs = ps.executeQuery();
+					
+					if(rs.first() == true)
+					{
+						contentBean.setLocation("feed");
+						// contentBean.setFeedId(Integer.parseInt(id));
+						contentBean.setFeedName(rs.getString("name"));
+					}
+					
+					ps.close();
+				break;
 			}
-			
-			ps.close();
+
 			conn.close();
 		}
 		catch(Exception e)
@@ -76,7 +93,7 @@ public class UtilBean
 			e.printStackTrace();
 		}
 		
-		return "failure";
+		return "home.xhtml?faces-redirect=true";
 	}
 
 	public String markAsRead()
