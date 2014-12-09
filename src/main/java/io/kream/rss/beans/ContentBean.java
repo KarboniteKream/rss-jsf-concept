@@ -1,4 +1,6 @@
-package io.kream.rss;
+package io.kream.rss.beans;
+
+import io.kream.rss.entities.Article;
 
 import java.sql.Blob;
 import java.sql.Connection;
@@ -11,6 +13,7 @@ import java.util.Base64;
 import java.util.List;
 
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -18,18 +21,24 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 @ManagedBean(name = "contentBean")
+// request?
 @SessionScoped
 public class ContentBean
 {
-	private int userId;
-	private String location;
-	private int feedId;
+//	@Resource(name = "jdbc/database")
+	private DataSource ds;
 	
+	@ManagedProperty(value = "#{userBean}")
+	private UserBean userBean;
+	
+	private String location;
+	private int feedId;	
+	
+	private String message;
+
 	private String sidebar;
 	private List<Article> articles;
-	
-//	@Resource(name = "jdbc/database")
-	DataSource ds;
+	private List<Article> featured;
 	
 	public ContentBean()
 	{
@@ -42,22 +51,17 @@ public class ContentBean
 		{
 			e.printStackTrace();
 		}
-		
-		userId = 1;
-		location = "feed";
+
+		location = "home";
 		feedId = 1;
 		
 		setArticles(new ArrayList<Article>());
+		setFeatured(new ArrayList<Article>());
 	}
 	
-	public int getUserId()
+	public void setUserBean(UserBean userBean)
 	{
-		return userId;
-	}
-	
-	public void setUserId(int userId)
-	{
-		this.userId = userId;
+		this.userBean = userBean;
 	}
 	
 	public String getLocation()
@@ -92,7 +96,7 @@ public class ContentBean
 			conn = ds.getConnection();
 			
 			ps = conn.prepareStatement("SELECT COUNT(article_id) AS unread FROM Unread WHERE user_id = ?");
-			ps.setInt(1, userId);
+			ps.setInt(1, userBean.getUser().getId());
 			ResultSet rs = ps.executeQuery();
 			rs.first();
 			int unread = rs.getInt("unread");
@@ -111,8 +115,8 @@ public class ContentBean
 			ps.close();
 			
 			ps = conn.prepareStatement("SELECT s.folder, f.id, f.name, f.icon, u.unread FROM Subscriptions s JOIN Feeds f ON s.feed_id = f.id LEFT JOIN (SELECT a.feed_id, COUNT(a.feed_id) AS unread FROM Unread JOIN Articles a ON article_id = a.id WHERE user_id = ? GROUP BY feed_id) AS u ON f.id = u.feed_id WHERE s.user_id = ? ORDER BY s.folder, f.name");
-			ps.setInt(1, userId);
-			ps.setInt(2, userId);
+			ps.setInt(1, userBean.getUser().getId());
+			ps.setInt(2, userBean.getUser().getId());
 			
 			rs = ps.executeQuery();
 			
@@ -211,7 +215,7 @@ public class ContentBean
 			if(location.equals("feed"))
 			{
 				ps = conn.prepareStatement("SELECT a.id, a.title, a.url, a.author, a.date, a.content FROM Users u JOIN Unread ur ON u.id = ur.user_id JOIN Articles a ON ur.article_id = a.id JOIN Feeds f ON a.feed_id = f.id WHERE u.id = ? AND f.id = ? ORDER BY a.date DESC");
-				ps.setInt(1, userId);
+				ps.setInt(1, userBean.getUser().getId());
 				ps.setInt(2, feedId);
 				
 				ResultSet rs = ps.executeQuery();
@@ -243,7 +247,55 @@ public class ContentBean
 		return articles;
 	}
 
-	public void setArticles(List<Article> articles) {
+	public void setArticles(List<Article> articles)
+	{
 		this.articles = articles;
+	}
+
+	public List<Article> getFeatured() {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		
+		featured.clear();
+		
+		try
+		{
+			conn = ds.getConnection();
+			
+			ps = conn.prepareStatement("SELECT a.id, a.title, a.url, a.author, a.date, a.content FROM Liked l JOIN Articles a ON l.article_id = a.id GROUP BY l.article_id ORDER BY COUNT(l.article_id) DESC");
+			
+			ResultSet rs = ps.executeQuery();
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			
+			while(rs.next() == true)
+			{
+				// number of likes
+				featured.add(new Article(rs.getInt("id"), rs.getString("title"), rs.getString("url"), rs.getString("author"), df.format(rs.getDate("date")), rs.getString("content")));
+			}
+			
+			ps.close();
+			conn.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return featured;
+	}
+
+	public void setFeatured(List<Article> featured)
+	{
+		this.featured = featured;
+	}
+
+	public String getMessage()
+	{
+		return message;
+	}
+
+	public void setMessage(String message)
+	{
+		this.message = message;
 	}
 }

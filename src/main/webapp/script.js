@@ -50,6 +50,7 @@ $(document).ready(function()
 
 	$(".action-bar").append('<span class="remove-article">Remove</span>');
 
+	// remove remove from index
 	$(".action-bar").on("click", ".remove-article", function()
 	{
 		$(this).parent().parent().slideUp(function()
@@ -312,53 +313,6 @@ function changeEmail()
 	});
 }
 
-function loadFeatured()
-{
-	$.ajax
-	({
-		url: "/util.php?function=load-featured",
-		type: "GET",
-		success: function(data)
-		{
-			$("#featured").empty();
-
-			$.parseJSON(data).forEach(function(article)
-			{
-				$("#featured").append
-				(
-					$("<article>").attr("id", article.id).append
-					(
-						$("<div>").addClass("date").text(article.date),
-						$("<h2>").append
-						(
-							$("<a>").attr("href", article.url).text(article.title)
-						),
-						$("<div>").addClass("content").html("<p>" + article.content + "</p>"),
-						$("<div>").addClass("action-bar").append
-						(
-							$("<span>").text("Like").click(function()
-							{
-								like($(this));
-							})
-						)
-					)
-				);
-
-				$("#reader article:last-child h2").after(function()
-				{
-					if(article.author != null)
-					{
-						return $("<div>").addClass("author").html("by <b>" + article.author + "</b>");
-					}
-				});
-			});
-
-			$(".action-bar").append('<span class="remove-article">Remove</span>');
-			$("article a").attr("target", "_blank");
-		}
-	});
-}
-
 function loadFeed()
 {
 	$.ajax
@@ -421,8 +375,6 @@ function loadFeed()
 								}
 							});
 						});
-
-						$("article a").attr("target", "_blank");
 					}
 					else
 					{
@@ -436,44 +388,6 @@ function loadFeed()
 		}
 	});
 
-}
-
-function sign_in()
-{
-	$.ajax
-	({
-		url: "/util.php?function=sign-in",
-		type: "POST",
-		data: { "email": $("#sign-in input[name='email']").val(), "password": $("#sign-in input[name='password']").val(), "remember_me": $("#remember-me").is(":checked") == true ? "true" : "false" },
-		success: function(data)
-		{
-			if(data == "OK")
-			{
-				location.reload();
-			}
-			else
-			{
-				// TODO: Incorrect password.
-			}
-		}
-	});
-}
-
-function register()
-{
-	$.ajax
-	({
-		url: "/util.php?function=register",
-		type: "POST",
-		data: { "real_name": $("#register input[name='real-name']").val(), "email": $("#register input[name='email']").val(), "password": $("#register input[name='password']").val() },
-		success: function(data)
-		{
-			if(data == "OK")
-			{
-				open("home.php", "_self");
-			}
-		}
-	});
 }
 
 function validateEmail(email)
@@ -498,8 +412,8 @@ function hideOverlay()
 
 function setSortable()
 {
-	$(".sortable").sortable(
-	{
+	$(".sortable").sortable
+	({
 		connectWith: ".connected"
 	});
 }

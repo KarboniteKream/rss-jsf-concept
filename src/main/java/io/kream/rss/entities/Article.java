@@ -1,4 +1,4 @@
-package io.kream.rss;
+package io.kream.rss.entities;
 
 public class Article
 {
