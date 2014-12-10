@@ -1,7 +1,5 @@
 package io.kream.rss.beans;
 
-import io.kream.rss.entities.Article;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,7 +22,6 @@ public class UtilBean
 	private ContentBean contentBean;
 
 	private int unreadCount;
-	private int articleId;
 
 	public UtilBean()
 	{
@@ -99,13 +96,76 @@ public class UtilBean
 		return "home.xhtml?faces-redirect=true";
 	}
 
-	public String markAsRead()
+	public String like(int articleId, boolean liked)
 	{
+		Connection conn = null;
+		PreparedStatement ps = null;
+
+		try
+		{
+			conn = ds.getConnection();
+			
+			if(liked == true)
+			{
+				ps = conn.prepareStatement("DELETE FROM Liked WHERE user_id = ? AND article_id = ?");
+			}
+			else
+			{
+				ps = conn.prepareStatement("INSERT INTO Liked VALUES (?, ?)");
+				ps.setInt(1, contentBean.getUserBean().getUser().getId());
+				ps.setInt(2, articleId);
+				ps.executeUpdate();
+				
+				ps = conn.prepareStatement("DELETE FROM Unread WHERE user_id = ? AND article_id = ?");
+			}
+			
+			ps.setInt(1, contentBean.getUserBean().getUser().getId());
+			ps.setInt(2, articleId);
+
+			ps.executeUpdate();
+
+			ps.close();
+			conn.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
 		return "success";
 	}
 
-	public String like()
+	public String markAsRead(int articleId, boolean unread)
 	{
+		Connection conn = null;
+		PreparedStatement ps = null;
+
+		try
+		{
+			conn = ds.getConnection();
+			
+			if(unread == true)
+			{
+				ps = conn.prepareStatement("DELETE FROM Unread WHERE user_id = ? AND article_id = ?");
+			}
+			else
+			{
+				ps = conn.prepareStatement("INSERT INTO Unread VALUES (?, ?)");
+			}
+			
+			ps.setInt(1, contentBean.getUserBean().getUser().getId());
+			ps.setInt(2, articleId);
+
+			ps.executeUpdate();
+
+			ps.close();
+			conn.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		
 		return "success";
 	}
 

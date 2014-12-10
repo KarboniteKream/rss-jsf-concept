@@ -13,6 +13,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
+
 @ManagedBean(name = "userBean")
 @SessionScoped
 public class UserBean
@@ -20,7 +22,11 @@ public class UserBean
 	private DataSource ds;
 
 	private User user;
+	private String confirmPassword;
 	private boolean rememberMe;
+	
+	private String loginMessage;
+	private String registerMessage;
 
 	public UserBean()
 	{
@@ -35,6 +41,10 @@ public class UserBean
 		}
 
 		user = new User();
+		rememberMe = false;
+		
+		loginMessage = "";
+		registerMessage = "";
 	}
 
 	public User getUser()
@@ -112,6 +122,7 @@ public class UserBean
 			}
 			else
 			{
+				loginMessage = "Incorrect email/password.";
 				response = "failure";
 			}
 
@@ -130,6 +141,11 @@ public class UserBean
 	{
 		Connection conn = null;
 		PreparedStatement ps = null;
+		
+		if(user.getRealName().equals("") == true || user.getEmail().equals("") == true || user.getPassword().equals("") == true || user.getPassword().equals(confirmPassword) == false)
+		{
+			return "failure";
+		}
 
 		try
 		{
@@ -145,11 +161,46 @@ public class UserBean
 			ps.close();
 			conn.close();
 		}
+		catch(MySQLIntegrityConstraintViolationException e)
+		{
+			registerMessage = "This email is already registered.";
+			return "failure";
+		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
 
 		return "home.xhtml?faces-redirect=true";
+	}
+
+	public String getRegisterMessage()
+	{
+		return registerMessage;
+	}
+
+	public void setRegisterMessage(String registerMessage)
+	{
+		this.registerMessage = registerMessage;
+	}
+
+	public String getConfirmPassword()
+	{
+		return confirmPassword;
+	}
+
+	public void setConfirmPassword(String confirmPassword)
+	{
+		this.confirmPassword = confirmPassword;
+	}
+
+	public String getLoginMessage()
+	{
+		return loginMessage;
+	}
+
+	public void setLoginMessage(String loginMessage)
+	{
+		this.loginMessage = loginMessage;
 	}
 }

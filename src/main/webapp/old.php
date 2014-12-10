@@ -1,24 +1,4 @@
 <?php
-	function checkEmail()
-	{
-		require("database.php");
-		$statement = $conn->prepare("SELECT email FROM Users WHERE email = :email");
-		$statement->bindParam(":email", $_POST["email"]);
-		$statement->execute();
-
-		if($statement->rowCount() != 0)
-		{
-			echo "ERR";
-		}
-		else
-		{
-			echo "OK";
-		}
-
-		$statement = null;
-		$conn = null;
-	}
-
 	function signOut()
 	{
 		if(session_start() == true)
@@ -50,56 +30,6 @@
 		$statement->bindParam(":folder", $folder);
 		$statement->bindParam(":user_id", $_SESSION["user_id"]);
 		$statement->bindParam(":feed_id", $_POST["feed_id"]);
-		$statement->execute();
-
-		$statement = null;
-		$conn = null;
-	}
-
-	function like()
-	{
-		require("database.php");
-
-		if($_POST["liked"] == "true")
-		{
-			$statement = $conn->prepare("DELETE FROM Liked WHERE user_id = :user_id AND article_id = :article_id");
-		}
-		else
-		{
-			$statement = $conn->prepare("INSERT INTO Liked (user_id, article_id) VALUES (:user_id, :article_id)");
-		}
-
-		$statement->bindParam(":user_id", $_SESSION["user_id"]);
-		$statement->bindParam(":article_id", $_POST["article_id"]);
-		$statement->execute();
-
-		if($_POST["liked"] == "false")
-		{
-			$statement = $conn->prepare("DELETE FROM Unread WHERE user_id = :user_id AND article_id = :article_id");
-			$statement->bindParam(":user_id", $_SESSION["user_id"]);
-			$statement->bindParam(":article_id", $_POST["article_id"]);
-			$statement->execute();
-		}
-
-		$statement = null;
-		$conn = null;
-	}
-
-	function markAsRead()
-	{
-		require("database.php");
-
-		if($_POST["unread"] == "true")
-		{
-			$statement = $conn->prepare("DELETE FROM Unread WHERE user_id = :user_id AND article_id = :article_id");
-		}
-		else
-		{
-			$statement = $conn->prepare("INSERT INTO Unread (user_id, article_id) VALUES (:user_id, :article_id)");
-		}
-
-		$statement->bindParam(":user_id", $_SESSION["user_id"]);
-		$statement->bindParam(":article_id", $_POST["article_id"]);
 		$statement->execute();
 
 		$statement = null;

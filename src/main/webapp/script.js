@@ -5,12 +5,9 @@ $(document).ready(function()
 	$("#overlay").hide();
 	$("#add-subscription").hide();
 	$(".popup").hide();
-	//$("#email-registered").hide();
 
-	// OK
 	$("article a").attr("target", "_blank");
 	setSortable();
-	// OK
 
 	$("input").on("input", function()
 	{
@@ -19,36 +16,10 @@ $(document).ready(function()
 			$(this).removeClass("input-empty");
 		}
 	});
-
-	$("#new-email").blur(function()
-	{
-		if(validateEmail($(this).val()) == true)
-		{
-			var input = $(this);
-
-			$.ajax
-			({
-				url: "/util.php?function=check-email",
-				type: "POST",
-				data: { "email": $(this).val() },
-				success: function(data)
-				{
-					if(data == "OK")
-					{
-						$("#email-registered").fadeOut();
-					}
-					else
-					{
-						$("#email-registered").fadeIn();
-					}
-				}
-			});
-		}
-	});
-
+	
+	// remove 'remove' from index.html
 	$(".action-bar").append('<span class="remove-article">Remove</span>');
 
-	// remove 'remove' from index.html
 	$(".action-bar").on("click", ".remove-article", function()
 	{
 		$(this).parent().parent().slideUp(function()
@@ -57,7 +28,7 @@ $(document).ready(function()
 		});
 	});
 
-	$("button[type='submit']").click(function()
+	$("input[type='submit']").click(function()
 	{
 		$(this).prevAll("input").filter(function()
 		{
@@ -69,7 +40,7 @@ $(document).ready(function()
 			return this.value;
 		}).removeClass("input-empty");
 
-		if($(this).prevAll().hasClass("input-error") || $(this).prevAll().hasClass("input-empty") || $("#email-registered").is(":visible"))
+		if($(this).prevAll().hasClass("input-error") || $(this).prevAll().hasClass("input-empty"))
 		{
 			event.preventDefault();
 		}
@@ -93,13 +64,11 @@ $(document).ready(function()
 			{
 				$("#add-subscription input").val("");
 				setSortable();
-				loadSidebar();
-				loadFeed();
 			}
 		});
 	});
 
-	$(".action-bar span:contains('ike')").click(function()
+	$(".action-bar a:contains('ike')").click(function()
 	{
 		$(this).parent().parent().toggleClass("liked");
 		($(this).text() == "Like") ? $(this).text("Unlike") : $(this).text("Like");
@@ -107,10 +76,10 @@ $(document).ready(function()
 		$(this).next().text("Mark as unread");
 	});
 
-	$(".action-bar span:contains('read')").click(function()
+	$(".action-bar a:contains('read')").click(function()
 	{
-		alert("OK");
-		markAsRead($(this));
+		$(this).parent().parent().toggleClass("unread");
+		($(this).text() == "Mark as read") ? $(this).text("Mark as unread") : $(this).text("Mark as read");
 	});
 
 	$(".open-popup").click(function()
@@ -119,7 +88,7 @@ $(document).ready(function()
 		$($(this).attr("target-popup")).fadeIn("fast");
 	});
 
-	$("input[type='email']").blur(function()
+	$("input[name$='email']").blur(function()
 	{
 		if(validateEmail($(this).val()) == false)
 		{
@@ -127,7 +96,7 @@ $(document).ready(function()
 		}
 	});
 
-	$("input[type='email']").on("input", function()
+	$("input[name$='email']").on("input", function()
 	{
 		if(validateEmail($(this).val()) == true)
 		{
@@ -135,7 +104,10 @@ $(document).ready(function()
 		}
 	});
 
-	$("span:contains('Refresh')").click(function(){});
+	$("span:contains('Refresh')").click(function()
+	{
+		location.reload();
+	});
 
 	$(".confirm-password, .confirm-email").blur(function()
 	{
@@ -166,34 +138,6 @@ $(document).ready(function()
 		($(this).text() == "v") ? $(this).text("u") : $(this).text("v");
 	});
 });
-
-
-function markAsRead(element)
-{
-	$.ajax
-	({
-		url: "/util.php?function=mark-as-read",
-		type: "POST",
-		data: { "article_id": element.parent().parent().attr("id"), "unread": element.parent().parent().hasClass("unread") ? "true" : "false" },
-		success: function(data)
-		{
-			element.parent().parent().toggleClass("unread");
-			(element.text() == "Mark as read") ? element.text("Mark as unread") : element.text("Mark as read");
-			loadSidebar();
-		}
-	});
-}
-
-function changeEmail()
-{
-	$.ajax
-	({
-		url: "/util.php?function=change-email",
-		type: "POST",
-		data: { "email": $("#change-email input[name='email']").val() }
-	});
-}
-
 
 function validateEmail(email)
 {

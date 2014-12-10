@@ -555,18 +555,22 @@ article.liked .action-bar
 	border-top: 1px solid #7851A9;
 }
 
+article .action-bar a,
 article .action-bar span
 {
 	color: #000000;
 	cursor: pointer;
 }
 
+article.unread .action-bar a,
+article.liked .action-bar a,
 article.unread .action-bar span,
 article.liked .action-bar span
 {
 	color: #FFFFFF;
 }
 
+.action-bar a,
 .action-bar span
 {
 	display: inline-block;
@@ -903,10 +907,11 @@ fieldset select
 	box-shadow: 0px 0px 5px #DF3E3E;
 }
 
-#email-registered
+.form-error
 {
 	display: inline-block;
 	width: 100%;
+	margin-top: 5px;
 	font-size: 14px;
 	color: #DF3E3E;
 	text-align: center;
