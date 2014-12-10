@@ -10,9 +10,8 @@ public class Feed
 	private String name;
 	private String icon;
 	private int unread;
-	private String folder;
 	
-	public Feed(int id, String name, Blob icon, int unread, String folder)
+	public Feed(int id, String name, Blob icon, int unread)
 	{
 		this.id = id;
 		this.name = name;
@@ -32,7 +31,6 @@ public class Feed
 		}
 		
 		this.unread = unread;
-		this.folder = folder;
 	}
 	
 	public int getId()
@@ -73,15 +71,5 @@ public class Feed
 	public void setUnread(int unread)
 	{
 		this.unread = unread;
-	}
-	
-	public String getFolder()
-	{
-		return folder;
-	}
-	
-	public void setFolder(String folder)
-	{
-		this.folder = folder;
 	}
 }

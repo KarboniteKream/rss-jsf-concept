@@ -171,4 +171,9 @@ public class UtilBean
 	{
 		this.unreadCount = unreadCount;
 	}
+	
+	public boolean isActive(int id)
+	{
+		return (id == contentBean.getFeedId());
+	}
 }

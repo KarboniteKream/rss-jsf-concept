@@ -33,13 +33,6 @@ public class ContentBean
 	private String feedName;
 
 	private String message;
-
-	private List<String> folders;
-	private ArrayList<ArrayList<Feed>> feeds;
-	private int idx;
-	
-	private List<Article> articles;
-	private List<Article> featured;
 	
 	public ContentBean()
 	{
@@ -58,13 +51,6 @@ public class ContentBean
 		setFeedName("Home");
 
 		message = "";
-
-		setFolders(new ArrayList<String>());
-		feeds = new ArrayList<ArrayList<Feed>>();
-		idx = 0;
-		
-		setArticles(new ArrayList<Article>());
-		setFeatured(new ArrayList<Article>());
 	}
 
 	public UserBean getUserBean()
@@ -96,84 +82,19 @@ public class ContentBean
 	{
 		this.feedId = feedId;
 	}
-	
-	public List<Feed> getFeeds()
-	{
-		Connection conn = null;
-		PreparedStatement ps = null;
-		
-		try
-		{
-			conn = ds.getConnection();
-			
-			feeds.clear();
-			idx = 0;
-			
-//			ps = conn.prepareStatement("SELECT COUNT(article_id) AS unread FROM Unread WHERE user_id = ?");
-//			sidebar += "<li><a id='unread' feed='unread' href='javascript:;'>Unread</a> ";
-//			if(unread > 0)
-//			{
-//				sidebar += String.format("<span class='badge'>%d</span></li>", unread);
-//			}
-			
-			ps = conn.prepareStatement("SELECT s.folder, f.id, f.name, f.icon, u.unread FROM Subscriptions s JOIN Feeds f ON s.feed_id = f.id LEFT JOIN (SELECT a.feed_id, COUNT(a.feed_id) AS unread FROM Unread JOIN Articles a ON article_id = a.id WHERE user_id = ? GROUP BY feed_id) AS u ON f.id = u.feed_id WHERE s.user_id = ? ORDER BY s.folder, f.name");
-			ps.setInt(1, userBean.getUser().getId());
-			ps.setInt(2, userBean.getUser().getId());
-			
-			ResultSet rs = ps.executeQuery();
 
-			ArrayList<Feed> l = new ArrayList<Feed>();
-			String prevFolder = null;
-			
-			while(rs.next() == true)
-			{
-				String folder = rs.getString("folder");
-				
-				if(prevFolder != null && folder.equals(prevFolder) == false)
-				{
-					prevFolder = folder;
-					feeds.add(l);
-					l = new ArrayList<Feed>();
-				}
-				else if(prevFolder == null && folder != prevFolder)
-				{
-					prevFolder = folder;
-					feeds.add(l);
-					l = new ArrayList<Feed>();
-				}
-				
-				l.add(new Feed(rs.getInt("id"), rs.getString("name"), rs.getBlob("icon"), rs.getInt("unread"), folder));
-			}
-			
-			feeds.add(l);
-
-			ps.close();
-			conn.close();
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-
-		return feeds.get(0);
-	}
-	
-	public void setFeeds(ArrayList<ArrayList<Feed>> feeds)
-	{
-		this.feeds = feeds;
-	}
-	
 	public List<String> getFolders()
 	{
 		Connection conn = null;
 		PreparedStatement ps = null;
 		
+		List<String> folders = new ArrayList<String>();
+		
 		try
 		{
 			conn = ds.getConnection();
-			folders.clear();
 			
-			ps = conn.prepareStatement("SELECT DISTINCT folder FROM Subscriptions WHERE user_id = ? ORDER BY folder");
+			ps = conn.prepareStatement("SELECT DISTINCT folder FROM Subscriptions WHERE user_id = ? AND folder IS NOT NULL ORDER BY folder");
 			ps.setInt(1, userBean.getUser().getId());
 			
 			ResultSet rs = ps.executeQuery();
@@ -193,25 +114,48 @@ public class ContentBean
 
 		return folders;
 	}
+	
+	public List<Feed> getFeeds(String folder)
+	{
+		Connection conn = null;
+		PreparedStatement ps = null;
+		
+		List<Feed> feeds = new ArrayList<Feed>();
+		
+		try
+		{
+			conn = ds.getConnection();
+			
+			if(folder.equals("") == true)
+			{
+				ps = conn.prepareStatement("SELECT f.id, f.name, f.icon, u.unread FROM Subscriptions s JOIN Feeds f ON s.feed_id = f.id LEFT JOIN (SELECT a.feed_id, COUNT(a.feed_id) AS unread FROM Unread JOIN Articles a ON article_id = a.id WHERE user_id = ? GROUP BY feed_id) AS u ON f.id = u.feed_id WHERE s.user_id = ? AND s.folder IS NULL ORDER BY f.name");
+				ps.setInt(1, userBean.getUser().getId());
+				ps.setInt(2, userBean.getUser().getId());
+			}
+			else
+			{
+				ps = conn.prepareStatement("SELECT f.id, f.name, f.icon, u.unread FROM Subscriptions s JOIN Feeds f ON s.feed_id = f.id LEFT JOIN (SELECT a.feed_id, COUNT(a.feed_id) AS unread FROM Unread JOIN Articles a ON article_id = a.id WHERE user_id = ? GROUP BY feed_id) AS u ON f.id = u.feed_id WHERE s.user_id = ? AND s.folder = ? ORDER BY f.name");
+				ps.setInt(1, userBean.getUser().getId());
+				ps.setInt(2, userBean.getUser().getId());
+				ps.setString(3, folder);
+			}
+			
+			ResultSet rs = ps.executeQuery();
 
-	public void setFolders(List<String> folders)
-	{
-		this.folders = folders;
-	}
-	
-	public List<Feed> getFolderFeeds()
-	{
-		int i = (idx == feeds.size() - 1) ? idx : idx + 1;
-		
-		List<Feed> folderFeeds = feeds.get(i);
-		idx++;
-		
-		return folderFeeds;
-	}
-	
-	public List<Feed> getParam(int id)
-	{
-		return feeds.get(0);
+			while(rs.next() == true)
+			{
+				feeds.add(new Feed(rs.getInt("id"), rs.getString("name"), rs.getBlob("icon"), rs.getInt("unread")));
+			}
+
+			ps.close();
+			conn.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+
+		return feeds;
 	}
 
 	public List<Article> getArticles()
@@ -219,10 +163,11 @@ public class ContentBean
 		Connection conn = null;
 		PreparedStatement ps = null;
 		
+		List<Article> articles = new ArrayList<Article>();
+		
 		try
 		{
 			conn = ds.getConnection();
-			articles.clear();
 			
 			if(location.equals("unread") == true)
 			{
@@ -285,16 +230,11 @@ public class ContentBean
 		return articles;
 	}
 
-	public void setArticles(List<Article> articles)
-	{
-		this.articles = articles;
-	}
-
 	public List<Article> getFeatured() {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		
-		featured.clear();
+		List<Article> featured = new ArrayList<Article>();
 		
 		try
 		{
@@ -320,11 +260,6 @@ public class ContentBean
 		}
 		
 		return featured;
-	}
-
-	public void setFeatured(List<Article> featured)
-	{
-		this.featured = featured;
 	}
 
 	public String getMessage()
