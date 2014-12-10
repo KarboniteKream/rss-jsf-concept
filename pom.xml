@@ -5,7 +5,7 @@
   <artifactId>rss</artifactId>
   <packaging>war</packaging>
   <version>0.0.1-SNAPSHOT</version>
-  <name>kream.io rss</name>
+  <name>rss.kream.io</name>
   <url>http://rss.kream.io</url>
   <properties>
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
