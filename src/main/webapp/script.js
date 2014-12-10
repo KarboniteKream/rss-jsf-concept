@@ -101,8 +101,10 @@ $(document).ready(function()
 
 	$(".action-bar span:contains('ike')").click(function()
 	{
-		alert("OK");
-		like($(this));
+		$(this).parent().parent().toggleClass("liked");
+		($(this).text() == "Like") ? $(this).text("Unlike") : $(this).text("Like");
+		$(this).parent().parent().removeClass("unread");
+		$(this).next().text("Mark as unread");
 	});
 
 	$(".action-bar span:contains('read')").click(function()
@@ -165,13 +167,6 @@ $(document).ready(function()
 	});
 });
 
-function like(element)
-{
-	element.parent().parent().toggleClass("liked");
-	(element.text() == "Like") ? element.text("Unlike") : element.text("Like");
-	element.parent().parent().removeClass("unread");
-	element.next().text("Mark as unread");
-}
 
 function markAsRead(element)
 {
