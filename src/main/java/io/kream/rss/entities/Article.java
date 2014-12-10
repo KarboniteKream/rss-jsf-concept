@@ -8,7 +8,7 @@ public class Article
 	private String author;
 	private String date;
 	private String content;
-	
+
 	private boolean liked;
 	private boolean unread;
 
@@ -20,7 +20,7 @@ public class Article
 		this.setAuthor(author);
 		this.setDate(date);
 		this.setContent(content);
-		
+
 		this.liked = liked;
 		this.unread = unread;
 	}

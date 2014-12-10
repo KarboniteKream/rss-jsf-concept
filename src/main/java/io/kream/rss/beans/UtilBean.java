@@ -19,13 +19,13 @@ import javax.sql.DataSource;
 public class UtilBean
 {
 	private DataSource ds;
-	
+
 	@ManagedProperty(value = "#{contentBean}")
 	private ContentBean contentBean;
-	
+
 	private int unreadCount;
 	private int articleId;
-	
+
 	public UtilBean()
 	{
 		try
@@ -38,17 +38,17 @@ public class UtilBean
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void setContentBean(ContentBean contentBean)
 	{
 		this.contentBean = contentBean;
 	}
-	
+
 	public String changeFeed()
 	{
 		Connection conn = null;
 		PreparedStatement ps = null;
-		
+
 		try
 		{
 			switch(contentBean.getFeedId())
@@ -72,20 +72,20 @@ public class UtilBean
 					contentBean.setLocation("all");
 					contentBean.setFeedName("All articles");
 				break;
-				
+
 				default:
 					conn = ds.getConnection();
 					ps = conn.prepareStatement("SELECT name FROM Feeds WHERE id = ?");
 					ps.setInt(1, contentBean.getFeedId());
-					
+
 					ResultSet rs = ps.executeQuery();
-					
+
 					if(rs.first() == true)
 					{
 						contentBean.setLocation("feed");
 						contentBean.setFeedName(rs.getString("name"));
 					}
-					
+
 					ps.close();
 					conn.close();
 				break;
@@ -95,7 +95,7 @@ public class UtilBean
 		{
 			e.printStackTrace();
 		}
-		
+
 		return "home.xhtml?faces-redirect=true";
 	}
 
@@ -108,25 +108,25 @@ public class UtilBean
 	{
 		return "success";
 	}
-	
+
 	public String unsubscribe()
 	{
 		Connection conn = null;
 		PreparedStatement ps = null;
-		
+
 		try
 		{
 			conn = ds.getConnection();
 			ps = conn.prepareStatement("DELETE FROM Subscriptions WHERE user_id = ? AND feed_id = ?");
 			ps.setInt(1, contentBean.getUserBean().getUser().getId());
 			ps.setInt(2, contentBean.getFeedId());
-			
+
 			ps.executeUpdate();
-			
+
 			contentBean.setLocation("home");
 			contentBean.setFeedId(-1);
 			contentBean.setFeedName("Home");
-			
+
 			ps.close();
 			conn.close();
 		}
@@ -134,28 +134,28 @@ public class UtilBean
 		{
 			e.printStackTrace();
 		}
-		
+
 		return "home.xhtml?faces-redirect=true";
 	}
-	
+
 	public int getUnreadCount()
 	{
 		Connection conn = null;
 		PreparedStatement ps = null;
-		
+
 		try
 		{
 			conn = ds.getConnection();
 			ps = conn.prepareStatement("SELECT COUNT(article_id) AS unread FROM Unread WHERE user_id = ?");
 			ps.setInt(1, contentBean.getUserBean().getUser().getId());
-			
+
 			ResultSet rs = ps.executeQuery();
-			
+
 			if(rs.first() == true)
 			{
 				unreadCount = rs.getInt("unread");
 			}
-			
+
 			ps.close();
 			conn.close();
 		}
@@ -163,15 +163,15 @@ public class UtilBean
 		{
 			e.printStackTrace();
 		}
-		
+
 		return unreadCount;
 	}
-	
+
 	public void setUnreadCount(int unreadCount)
 	{
 		this.unreadCount = unreadCount;
 	}
-	
+
 	public boolean isActive(int id)
 	{
 		return (id == contentBean.getFeedId());
